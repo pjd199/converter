@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF to JPG Converter</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+            text-align: center;
+        }
+
+        .subtitle {
+            color: #666;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .source-toggle {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            background: #f0f0f0;
+            padding: 5px;
+            border-radius: 10px;
+        }
+
+        .toggle-btn {
+            flex: 1;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 7px;
+            background: transparent;
+            color: #666;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-btn.active {
+            background: white;
+            color: #667eea;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .toggle-btn:hover:not(.active) {
+            color: #667eea;
+        }
+
+        .url-input-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .url-input-container input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .url-input-container input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .url-input-container button {
+            padding: 12px 24px;
+            white-space: nowrap;
+        }
+
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #f8f9ff;
+        }
+
+        .upload-area:hover {
+            border-color: #764ba2;
+            background: #f0f1ff;
+        }
+
+        .upload-area.dragover {
+            border-color: #764ba2;
+            background: #e8e9ff;
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .upload-text {
+            color: #667eea;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .upload-subtext {
+            color: #999;
+            font-size: 13px;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .controls {
+            margin-top: 25px;
+            display: none;
+        }
+
+        .control-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        select, input[type="range"] {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        input[type="range"] {
+            padding: 0;
+        }
+
+        .quality-value {
+            display: inline-block;
+            margin-left: 10px;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .resolution-display {
+            margin-top: 8px;
+            padding: 8px 12px;
+            background: #f0f1ff;
+            border-radius: 6px;
+            color: #667eea;
+            font-size: 13px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .preview {
+            margin-top: 25px;
+            display: none;
+        }
+
+        .preview-title {
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        #previewCanvas {
+            max-width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .button-group {
+            margin-top: 25px;
+            display: none;
+            gap: 10px;
+        }
+
+        button {
+            flex: 1;
+            padding: 14px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .status {
+            margin-top: 20px;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 14px;
+            display: none;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .loader {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+            display: none;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>PDF to JPG Converter</h1>
+        <p class="subtitle">Convert your PDF pages to high-quality JPG images</p>
+
+        <div class="source-toggle">
+            <button class="toggle-btn active" id="localBtn">Local File</button>
+            <button class="toggle-btn" id="urlBtn">From URL</button>
+        </div>
+
+        <div class="upload-area" id="uploadArea">
+            <div class="upload-icon">📄</div>
+            <div class="upload-text">Click to upload or drag and drop</div>
+            <div class="upload-subtext">PDF files only</div>
+        </div>
+
+        <div class="url-input-container" id="urlInputContainer" style="display: none;">
+            <input type="text" id="urlInput" placeholder="Enter PDF URL (e.g., https://example.com/file.pdf)">
+            <button class="btn-primary" id="loadUrlBtn">Load PDF</button>
+        </div>
+
+        <input type="file" id="fileInput" accept="application/pdf">
+
+        <div class="controls" id="controls">
+            <div class="control-group">
+                <label for="pageSelect">Select Page:</label>
+                <select id="pageSelect"></select>
+            </div>
+            <div class="control-group">
+                <label for="resolutionSlider">
+                    Resolution: <span class="quality-value" id="resolutionValue">2x</span>
+                </label>
+                <input type="range" id="resolutionSlider" min="1" max="5" step="0.5" value="2">
+                <div class="resolution-display" id="resolutionDisplay">Output: Calculating...</div>
+            </div>
+            <div class="control-group">
+                <label for="qualitySlider">
+                    Image Quality: <span class="quality-value" id="qualityValue">90%</span>
+                </label>
+                <input type="range" id="qualitySlider" min="10" max="100" value="90">
+            </div>
+        </div>
+
+        <div class="loader" id="loader"></div>
+
+        <div class="preview" id="preview">
+            <div class="preview-title">Preview:</div>
+            <canvas id="previewCanvas"></canvas>
+        </div>
+
+        <div class="button-group" id="buttonGroup">
+            <button class="btn-primary" id="downloadBtn">Download JPG</button>
+            <button class="btn-secondary" id="resetBtn">Upload New PDF</button>
+        </div>
+
+        <div class="status" id="status"></div>
+    </div>
+
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const localBtn = document.getElementById('localBtn');
+        const urlBtn = document.getElementById('urlBtn');
+        const urlInputContainer = document.getElementById('urlInputContainer');
+        const urlInput = document.getElementById('urlInput');
+        const loadUrlBtn = document.getElementById('loadUrlBtn');
+        const controls = document.getElementById('controls');
+        const pageSelect = document.getElementById('pageSelect');
+        const resolutionSlider = document.getElementById('resolutionSlider');
+        const resolutionValue = document.getElementById('resolutionValue');
+        const resolutionDisplay = document.getElementById('resolutionDisplay');
+        const qualitySlider = document.getElementById('qualitySlider');
+        const qualityValue = document.getElementById('qualityValue');
+        const preview = document.getElementById('preview');
+        const previewCanvas = document.getElementById('previewCanvas');
+        const buttonGroup = document.getElementById('buttonGroup');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const status = document.getElementById('status');
+        const loader = document.getElementById('loader');
+
+        let pdfDoc = null;
+        let currentPage = 1;
+
+        uploadArea.addEventListener('click', () => fileInput.click());
+
+        // Toggle between local and URL modes
+        localBtn.addEventListener('click', () => {
+            localBtn.classList.add('active');
+            urlBtn.classList.remove('active');
+            uploadArea.style.display = 'block';
+            urlInputContainer.style.display = 'none';
+        });
+
+        urlBtn.addEventListener('click', () => {
+            urlBtn.classList.add('active');
+            localBtn.classList.remove('active');
+            uploadArea.style.display = 'none';
+            urlInputContainer.style.display = 'flex';
+        });
+
+        // Load PDF from URL
+        loadUrlBtn.addEventListener('click', async () => {
+            const url = urlInput.value.trim();
+            if (!url) {
+                showStatus('Please enter a valid URL', 'error');
+                return;
+            }
+            await loadPdfFromUrl(url);
+        });
+
+        // Allow Enter key to load URL
+        urlInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                loadUrlBtn.click();
+            }
+        });
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const file = e.dataTransfer.files[0];
+            if (file && file.type === 'application/pdf') {
+                handleFile(file);
+            } else {
+                showStatus('Please upload a valid PDF file', 'error');
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                handleFile(file);
+            }
+        });
+
+        resolutionSlider.addEventListener('input', (e) => {
+            resolutionValue.textContent = e.target.value + 'x';
+            if (pdfDoc) {
+                renderPage(currentPage);
+            }
+        });
+
+        qualitySlider.addEventListener('input', (e) => {
+            qualityValue.textContent = e.target.value + '%';
+            if (pdfDoc) {
+                renderPage(currentPage);
+            }
+        });
+
+        pageSelect.addEventListener('change', (e) => {
+            currentPage = parseInt(e.target.value);
+            renderPage(currentPage);
+        });
+
+        downloadBtn.addEventListener('click', downloadImage);
+
+        resetBtn.addEventListener('click', () => {
+            location.reload();
+        });
+
+        async function handleFile(file) {
+            showLoader(true);
+            hideStatus();
+
+            try {
+                const arrayBuffer = await file.arrayBuffer();
+                await loadPdfFromArrayBuffer(arrayBuffer);
+            } catch (error) {
+                showLoader(false);
+                showStatus('Error loading PDF: ' + error.message, 'error');
+            }
+        }
+
+        async function loadPdfFromUrl(url) {
+            showLoader(true);
+            hideStatus();
+
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch PDF: ${response.status} ${response.statusText}`);
+                }
+                
+                const arrayBuffer = await response.arrayBuffer();
+                await loadPdfFromArrayBuffer(arrayBuffer);
+            } catch (error) {
+                showLoader(false);
+                showStatus('Error loading PDF from URL: ' + error.message, 'error');
+            }
+        }
+
+        async function loadPdfFromArrayBuffer(arrayBuffer) {
+            try {
+                pdfDoc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+
+                pageSelect.innerHTML = '';
+                for (let i = 1; i <= pdfDoc.numPages; i++) {
+                    const option = document.createElement('option');
+                    option.value = i;
+                    option.textContent = `Page ${i} of ${pdfDoc.numPages}`;
+                    pageSelect.appendChild(option);
+                }
+
+                controls.style.display = 'block';
+                currentPage = 1;
+                await renderPage(currentPage);
+                
+                showLoader(false);
+                showStatus('PDF loaded successfully!', 'success');
+            } catch (error) {
+                showLoader(false);
+                throw error;
+            }
+        }
+
+        async function renderPage(pageNum) {
+            showLoader(true);
+
+            try {
+                const page = await pdfDoc.getPage(pageNum);
+                const scale = parseFloat(resolutionSlider.value);
+                const viewport = page.getViewport({ scale });
+
+                const canvas = previewCanvas;
+                const context = canvas.getContext('2d');
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+
+                // Update resolution display
+                resolutionDisplay.textContent = `Output: ${Math.round(viewport.width)} × ${Math.round(viewport.height)} pixels`;
+
+                await page.render({
+                    canvasContext: context,
+                    viewport: viewport
+                }).promise;
+
+                preview.style.display = 'block';
+                buttonGroup.style.display = 'flex';
+                showLoader(false);
+            } catch (error) {
+                showLoader(false);
+                showStatus('Error rendering page: ' + error.message, 'error');
+            }
+        }
+
+        function downloadImage() {
+            const quality = qualitySlider.value / 100;
+            const dataUrl = previewCanvas.toDataURL('image/jpeg', quality);
+            
+            const link = document.createElement('a');
+            link.download = `page-${currentPage}.jpg`;
+            link.href = dataUrl;
+            link.click();
+
+            showStatus('Image downloaded successfully!', 'success');
+        }
+
+        function showStatus(message, type) {
+            status.textContent = message;
+            status.className = 'status ' + type;
+            status.style.display = 'block';
+            
+            setTimeout(() => {
+                hideStatus();
+            }, 4000);
+        }
+
+        function hideStatus() {
+            status.style.display = 'none';
+        }
+
+        function showLoader(show) {
+            loader.style.display = show ? 'block' : 'none';
+        }
+    </script>
+</body>
+</html>
