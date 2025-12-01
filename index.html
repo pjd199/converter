@@ -1,6 +1,1090 @@
-<html>
-  <body>
-    <a href=pdf-to-jpg-converter-url.html>URL</a>
-    <a href=pdf-to-jpg-converter-file.html>URL</a>
-  </body>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Converter Suite</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        /* Welcome Page Styles */
+        .welcome-page {
+            text-align: center;
+        }
+
+        .welcome-page h1 {
+            color: #333;
+            font-size: 36px;
+            margin-bottom: 15px;
+        }
+
+        .welcome-page .subtitle {
+            color: #666;
+            font-size: 16px;
+            margin-bottom: 40px;
+        }
+
+        .converter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .converter-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            padding: 30px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: white;
+            text-align: center;
+        }
+
+        .converter-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .converter-card .icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .converter-card .title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .converter-card .description {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+
+        /* Converter Page Styles */
+        .converter-page {
+            display: none;
+        }
+
+        .converter-page.active {
+            display: block;
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: #f0f0f0;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            color: #333;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            background: #e0e0e0;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+            text-align: center;
+        }
+
+        .page-subtitle {
+            color: #666;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #f8f9ff;
+        }
+
+        .upload-area:hover {
+            border-color: #764ba2;
+            background: #f0f1ff;
+        }
+
+        .upload-area.dragover {
+            border-color: #764ba2;
+            background: #e8e9ff;
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .upload-text {
+            color: #667eea;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .upload-subtext {
+            color: #999;
+            font-size: 13px;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .controls {
+            margin-top: 25px;
+            display: none;
+        }
+
+        .control-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        select, input[type="range"] {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        input[type="range"] {
+            padding: 0;
+        }
+
+        .quality-value {
+            display: inline-block;
+            margin-left: 10px;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .resolution-display {
+            margin-top: 8px;
+            padding: 8px 12px;
+            background: #f0f1ff;
+            border-radius: 6px;
+            color: #667eea;
+            font-size: 13px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .preview {
+            margin-top: 25px;
+            display: none;
+        }
+
+        .preview-title {
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        .preview-canvas, .preview-image {
+            max-width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .button-group {
+            margin-top: 25px;
+            display: none;
+            gap: 10px;
+        }
+
+        button.btn-primary, button.btn-secondary {
+            flex: 1;
+            padding: 14px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .status {
+            margin-top: 20px;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 14px;
+            display: none;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .loader {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+            display: none;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="welcome-page" id="welcomePage">
+            <h1>🎨 Image Converter Suite</h1>
+            <p class="subtitle">Professional image conversion tools - all in your browser</p>
+
+            <div class="converter-grid">
+                <div class="converter-card" data-converter="pdf">
+                    <div class="icon">📄</div>
+                    <div class="title">PDF to JPG</div>
+                    <div class="description">Convert PDF pages to high-quality images</div>
+                </div>
+
+                <div class="converter-card" data-converter="png">
+                    <div class="icon">🖼️</div>
+                    <div class="title">PNG to JPG</div>
+                    <div class="description">Convert PNG images with transparency</div>
+                </div>
+
+                <div class="converter-card" data-converter="svg">
+                    <div class="icon">✨</div>
+                    <div class="title">SVG to JPG</div>
+                    <div class="description">Rasterize vector graphics to JPG</div>
+                </div>
+
+                <div class="converter-card" data-converter="webp">
+                    <div class="icon">🌐</div>
+                    <div class="title">WebP to JPG</div>
+                    <div class="description">Convert modern WebP format to JPG</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="converter-page" id="pdfConverter">
+            <button class="back-button" onclick="showWelcome()">← Back to Home</button>
+            <h1>PDF to JPG Converter</h1>
+            <p class="page-subtitle">Convert your PDF pages to high-quality JPG images</p>
+
+            <div class="upload-area" id="pdfUploadArea">
+                <div class="upload-icon">📄</div>
+                <div class="upload-text">Click to upload or drag and drop</div>
+                <div class="upload-subtext">PDF files only</div>
+            </div>
+
+            <input type="file" id="pdfFileInput" class="file-input" accept="application/pdf">
+
+            <div class="controls" id="pdfControls">
+                <div class="control-group">
+                    <label for="pdfPageSelect">Select Page:</label>
+                    <select id="pdfPageSelect"></select>
+                </div>
+                <div class="control-group">
+                    <label for="pdfResolutionSlider">
+                        Resolution: <span class="quality-value" id="pdfResolutionValue">2x</span>
+                    </label>
+                    <input type="range" id="pdfResolutionSlider" min="1" max="5" step="0.5" value="2">
+                    <div class="resolution-display" id="pdfResolutionDisplay">Output: Calculating...</div>
+                </div>
+                <div class="control-group">
+                    <label for="pdfQualitySlider">
+                        Image Quality: <span class="quality-value" id="pdfQualityValue">90%</span>
+                    </label>
+                    <input type="range" id="pdfQualitySlider" min="10" max="100" value="90">
+                </div>
+            </div>
+
+            <div class="loader" id="pdfLoader"></div>
+
+            <div class="preview" id="pdfPreview">
+                <div class="preview-title">Preview:</div>
+                <canvas id="pdfPreviewCanvas" class="preview-canvas"></canvas>
+            </div>
+
+            <div class="button-group" id="pdfButtonGroup">
+                <button class="btn-primary" id="pdfDownloadBtn">Download JPG</button>
+                <button class="btn-secondary" id="pdfResetBtn">Upload New PDF</button>
+            </div>
+
+            <div class="status" id="pdfStatus"></div>
+        </div>
+
+        <div class="converter-page" id="pngConverter">
+            <button class="back-button" onclick="showWelcome()">← Back to Home</button>
+            <h1>PNG to JPG Converter</h1>
+            <p class="page-subtitle">Convert PNG images to JPG format</p>
+
+            <div class="upload-area" id="pngUploadArea">
+                <div class="upload-icon">🖼️</div>
+                <div class="upload-text">Click to upload or drag and drop</div>
+                <div class="upload-subtext">PNG files only</div>
+            </div>
+
+            <input type="file" id="pngFileInput" class="file-input" accept="image/png">
+
+            <div class="controls" id="pngControls">
+                <div class="control-group">
+                    <label for="pngQualitySlider">
+                        Image Quality: <span class="quality-value" id="pngQualityValue">90%</span>
+                    </label>
+                    <input type="range" id="pngQualitySlider" min="10" max="100" value="90">
+                </div>
+                <div class="control-group">
+                    <label for="pngBgColor">Background Color (for transparency):</label>
+                    <select id="pngBgColor">
+                        <option value="white">White</option>
+                        <option value="black">Black</option>
+                        <option value="custom">Custom...</option>
+                    </select>
+                    <input type="color" id="pngCustomColor" value="#ffffff" style="width: 100%; margin-top: 10px; display: none;">
+                </div>
+            </div>
+
+            <div class="loader" id="pngLoader"></div>
+
+            <div class="preview" id="pngPreview">
+                <div class="preview-title">Preview:</div>
+                <canvas id="pngPreviewCanvas" class="preview-canvas"></canvas>
+            </div>
+
+            <div class="button-group" id="pngButtonGroup">
+                <button class="btn-primary" id="pngDownloadBtn">Download JPG</button>
+                <button class="btn-secondary" id="pngResetBtn">Upload New PNG</button>
+            </div>
+
+            <div class="status" id="pngStatus"></div>
+        </div>
+
+        <div class="converter-page" id="svgConverter">
+            <button class="back-button" onclick="showWelcome()">← Back to Home</button>
+            <h1>SVG to JPG Converter</h1>
+            <p class="page-subtitle">Convert vector SVG graphics to JPG images</p>
+
+            <div class="upload-area" id="svgUploadArea">
+                <div class="upload-icon">✨</div>
+                <div class="upload-text">Click to upload or drag and drop</div>
+                <div class="upload-subtext">SVG files only</div>
+            </div>
+
+            <input type="file" id="svgFileInput" class="file-input" accept="image/svg+xml">
+
+            <div class="controls" id="svgControls">
+                <div class="control-group">
+                    <label for="svgScale">
+                        Scale: <span class="quality-value" id="svgScaleValue">2x</span>
+                    </label>
+                    <input type="range" id="svgScale" min="1" max="5" step="0.5" value="2">
+                    <div class="resolution-display" id="svgResolutionDisplay">Output: Calculating...</div>
+                </div>
+                <div class="control-group">
+                    <label for="svgQualitySlider">
+                        Image Quality: <span class="quality-value" id="svgQualityValue">90%</span>
+                    </label>
+                    <input type="range" id="svgQualitySlider" min="10" max="100" value="90">
+                </div>
+                <div class="control-group">
+                    <label for="svgBgColor">Background Color:</label>
+                    <select id="svgBgColor">
+                        <option value="white">White</option>
+                        <option value="black">Black</option>
+                        <option value="transparent">Transparent (if supported)</option>
+                        <option value="custom">Custom...</option>
+                    </select>
+                    <input type="color" id="svgCustomColor" value="#ffffff" style="width: 100%; margin-top: 10px; display: none;">
+                </div>
+            </div>
+
+            <div class="loader" id="svgLoader"></div>
+
+            <div class="preview" id="svgPreview">
+                <div class="preview-title">Preview:</div>
+                <canvas id="svgPreviewCanvas" class="preview-canvas"></canvas>
+            </div>
+
+            <div class="button-group" id="svgButtonGroup">
+                <button class="btn-primary" id="svgDownloadBtn">Download JPG</button>
+                <button class="btn-secondary" id="svgResetBtn">Upload New SVG</button>
+            </div>
+
+            <div class="status" id="svgStatus"></div>
+        </div>
+
+        <div class="converter-page" id="webpConverter">
+            <button class="back-button" onclick="showWelcome()">← Back to Home</button>
+            <h1>WebP to JPG Converter</h1>
+            <p class="page-subtitle">Convert modern WebP images to JPG format</p>
+
+            <div class="upload-area" id="webpUploadArea">
+                <div class="upload-icon">🌐</div>
+                <div class="upload-text">Click to upload or drag and drop</div>
+                <div class="upload-subtext">WebP files only</div>
+            </div>
+
+            <input type="file" id="webpFileInput" class="file-input" accept="image/webp">
+
+            <div class="controls" id="webpControls">
+                <div class="control-group">
+                    <label for="webpQualitySlider">
+                        Image Quality: <span class="quality-value" id="webpQualityValue">90%</span>
+                    </label>
+                    <input type="range" id="webpQualitySlider" min="10" max="100" value="90">
+                </div>
+            </div>
+
+            <div class="loader" id="webpLoader"></div>
+
+            <div class="preview" id="webpPreview">
+                <div class="preview-title">Preview:</div>
+                <canvas id="webpPreviewCanvas" class="preview-canvas"></canvas>
+            </div>
+
+            <div class="button-group" id="webpButtonGroup">
+                <button class="btn-primary" id="webpDownloadBtn">Download JPG</button>
+                <button class="btn-secondary" id="webpResetBtn">Upload New WebP</button>
+            </div>
+
+            <div class="status" id="webpStatus"></div>
+        </div>
+    </div>
+
+    <script>
+        // Wait for DOM to be fully loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+            // Navigation
+            window.showWelcome = function() {
+                document.getElementById('welcomePage').style.display = 'block';
+                document.querySelectorAll('.converter-page').forEach(page => {
+                    page.classList.remove('active');
+                });
+            }
+
+            window.showConverter = function(type) {
+                document.getElementById('welcomePage').style.display = 'none';
+                document.querySelectorAll('.converter-page').forEach(page => {
+                    page.classList.remove('active');
+                });
+                document.getElementById(type + 'Converter').classList.add('active');
+            }
+
+            document.querySelectorAll('.converter-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    showConverter(card.dataset.converter);
+                });
+            });
+
+        // ==================== PDF TO JPG ====================
+        const pdfUploadArea = document.getElementById('pdfUploadArea');
+        const pdfFileInput = document.getElementById('pdfFileInput');
+        const pdfControls = document.getElementById('pdfControls');
+        const pdfPageSelect = document.getElementById('pdfPageSelect');
+        const pdfResolutionSlider = document.getElementById('pdfResolutionSlider');
+        const pdfResolutionValue = document.getElementById('pdfResolutionValue');
+        const pdfResolutionDisplay = document.getElementById('pdfResolutionDisplay');
+        const pdfQualitySlider = document.getElementById('pdfQualitySlider');
+        const pdfQualityValue = document.getElementById('pdfQualityValue');
+        const pdfPreview = document.getElementById('pdfPreview');
+        const pdfPreviewCanvas = document.getElementById('pdfPreviewCanvas');
+        const pdfButtonGroup = document.getElementById('pdfButtonGroup');
+        const pdfDownloadBtn = document.getElementById('pdfDownloadBtn');
+        const pdfResetBtn = document.getElementById('pdfResetBtn');
+        const pdfStatus = document.getElementById('pdfStatus');
+        const pdfLoader = document.getElementById('pdfLoader');
+
+        let pdfDoc = null;
+        let currentPage = 1;
+
+        pdfUploadArea.addEventListener('click', () => pdfFileInput.click());
+        pdfUploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            pdfUploadArea.classList.add('dragover');
+        });
+        pdfUploadArea.addEventListener('dragleave', () => pdfUploadArea.classList.remove('dragover'));
+        pdfUploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            pdfUploadArea.classList.remove('dragover');
+            const file = e.dataTransfer.files[0];
+            if (file && file.type === 'application/pdf') {
+                handlePdfFile(file);
+            } else {
+                showPdfStatus('Please upload a valid PDF file', 'error');
+            }
+        });
+
+        pdfFileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) handlePdfFile(file);
+        });
+
+        pdfResolutionSlider.addEventListener('input', (e) => {
+            pdfResolutionValue.textContent = e.target.value + 'x';
+            if (pdfDoc) renderPdfPage(currentPage);
+        });
+
+        pdfQualitySlider.addEventListener('input', (e) => {
+            pdfQualityValue.textContent = e.target.value + '%';
+        });
+
+        pdfPageSelect.addEventListener('change', (e) => {
+            currentPage = parseInt(e.target.value);
+            renderPdfPage(currentPage);
+        });
+
+        pdfDownloadBtn.addEventListener('click', () => {
+            const quality = pdfQualitySlider.value / 100;
+            const dataUrl = pdfPreviewCanvas.toDataURL('image/jpeg', quality);
+            const link = document.createElement('a');
+            link.download = `page-${currentPage}.jpg`;
+            link.href = dataUrl;
+            link.click();
+            showPdfStatus('Image downloaded successfully!', 'success');
+        });
+
+        pdfResetBtn.addEventListener('click', () => {
+            pdfFileInput.value = '';
+            pdfControls.style.display = 'none';
+            pdfPreview.style.display = 'none';
+            pdfButtonGroup.style.display = 'none';
+            hidePdfStatus();
+        });
+
+        async function handlePdfFile(file) {
+            showPdfLoader(true);
+            hidePdfStatus();
+
+            try {
+                const arrayBuffer = await file.arrayBuffer();
+                pdfDoc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+
+                pdfPageSelect.innerHTML = '';
+                for (let i = 1; i <= pdfDoc.numPages; i++) {
+                    const option = document.createElement('option');
+                    option.value = i;
+                    option.textContent = `Page ${i} of ${pdfDoc.numPages}`;
+                    pdfPageSelect.appendChild(option);
+                }
+
+                pdfControls.style.display = 'block';
+                currentPage = 1;
+                await renderPdfPage(currentPage);
+                
+                showPdfLoader(false);
+                showPdfStatus('PDF loaded successfully!', 'success');
+            } catch (error) {
+                showPdfLoader(false);
+                showPdfStatus('Error loading PDF: ' + error.message, 'error');
+            }
+        }
+
+        async function renderPdfPage(pageNum) {
+            showPdfLoader(true);
+
+            try {
+                const page = await pdfDoc.getPage(pageNum);
+                const scale = parseFloat(pdfResolutionSlider.value);
+                const viewport = page.getViewport({ scale });
+
+                const canvas = pdfPreviewCanvas;
+                const context = canvas.getContext('2d');
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+
+                pdfResolutionDisplay.textContent = `Output: ${Math.round(viewport.width)} × ${Math.round(viewport.height)} pixels`;
+
+                await page.render({
+                    canvasContext: context,
+                    viewport: viewport
+                }).promise;
+
+                pdfPreview.style.display = 'block';
+                pdfButtonGroup.style.display = 'flex';
+                showPdfLoader(false);
+            } catch (error) {
+                showPdfLoader(false);
+                showPdfStatus('Error rendering page: ' + error.message, 'error');
+            }
+        }
+
+        function showPdfStatus(message, type) {
+            pdfStatus.textContent = message;
+            pdfStatus.className = 'status ' + type;
+            pdfStatus.style.display = 'block';
+            setTimeout(() => hidePdfStatus(), 4000);
+        }
+
+        function hidePdfStatus() {
+            pdfStatus.style.display = 'none';
+        }
+
+        function showPdfLoader(show) {
+            pdfLoader.style.display = show ? 'block' : 'none';
+        }
+
+        // ==================== PNG TO JPG ====================
+        const pngUploadArea = document.getElementById('pngUploadArea');
+        const pngFileInput = document.getElementById('pngFileInput');
+        const pngControls = document.getElementById('pngControls');
+        const pngQualitySlider = document.getElementById('pngQualitySlider');
+        const pngQualityValue = document.getElementById('pngQualityValue');
+        const pngBgColor = document.getElementById('pngBgColor');
+        const pngCustomColor = document.getElementById('pngCustomColor');
+        const pngPreview = document.getElementById('pngPreview');
+        const pngPreviewCanvas = document.getElementById('pngPreviewCanvas');
+        const pngButtonGroup = document.getElementById('pngButtonGroup');
+        const pngDownloadBtn = document.getElementById('pngDownloadBtn');
+        const pngResetBtn = document.getElementById('pngResetBtn');
+        const pngStatus = document.getElementById('pngStatus');
+        const pngLoader = document.getElementById('pngLoader');
+
+        let pngImage = null;
+
+        pngUploadArea.addEventListener('click', () => pngFileInput.click());
+        setupDragDrop(pngUploadArea, pngFileInput, 'image/png', handlePngFile, 'PNG');
+
+        pngFileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) handlePngFile(file);
+        });
+
+        pngQualitySlider.addEventListener('input', (e) => {
+            pngQualityValue.textContent = e.target.value + '%';
+        });
+
+        pngBgColor.addEventListener('change', (e) => {
+            pngCustomColor.style.display = e.target.value === 'custom' ? 'block' : 'none';
+            if (pngImage) renderPngImage();
+        });
+
+        pngCustomColor.addEventListener('input', () => {
+            if (pngImage) renderPngImage();
+        });
+
+        pngDownloadBtn.addEventListener('click', () => {
+            const quality = pngQualitySlider.value / 100;
+            const dataUrl = pngPreviewCanvas.toDataURL('image/jpeg', quality);
+            const link = document.createElement('a');
+            link.download = 'converted.jpg';
+            link.href = dataUrl;
+            link.click();
+            showPngStatus('Image downloaded successfully!', 'success');
+        });
+
+        pngResetBtn.addEventListener('click', () => {
+            pngFileInput.value = '';
+            pngControls.style.display = 'none';
+            pngPreview.style.display = 'none';
+            pngButtonGroup.style.display = 'none';
+            hidePngStatus();
+        });
+
+        function handlePngFile(file) {
+            showPngLoader(true);
+            hidePngStatus();
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                pngImage = new Image();
+                pngImage.onload = () => {
+                    renderPngImage();
+                    pngControls.style.display = 'block';
+                    showPngLoader(false);
+                    showPngStatus('PNG loaded successfully!', 'success');
+                };
+                pngImage.onerror = () => {
+                    showPngLoader(false);
+                    showPngStatus('Error loading PNG image', 'error');
+                };
+                pngImage.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function renderPngImage() {
+            const canvas = pngPreviewCanvas;
+            const ctx = canvas.getContext('2d');
+            canvas.width = pngImage.width;
+            canvas.height = pngImage.height;
+
+            let bgColor = 'white';
+            if (pngBgColor.value === 'black') bgColor = 'black';
+            else if (pngBgColor.value === 'custom') bgColor = pngCustomColor.value;
+
+            ctx.fillStyle = bgColor;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(pngImage, 0, 0);
+
+            pngPreview.style.display = 'block';
+            pngButtonGroup.style.display = 'flex';
+        }
+
+        function showPngStatus(message, type) {
+            pngStatus.textContent = message;
+            pngStatus.className = 'status ' + type;
+            pngStatus.style.display = 'block';
+            setTimeout(() => hidePngStatus(), 4000);
+        }
+
+        function hidePngStatus() {
+            pngStatus.style.display = 'none';
+        }
+
+        function showPngLoader(show) {
+            pngLoader.style.display = show ? 'block' : 'none';
+        }
+
+        // ==================== SVG TO JPG ====================
+        const svgUploadArea = document.getElementById('svgUploadArea');
+        const svgFileInput = document.getElementById('svgFileInput');
+        const svgControls = document.getElementById('svgControls');
+        const svgScale = document.getElementById('svgScale');
+        const svgScaleValue = document.getElementById('svgScaleValue');
+        const svgResolutionDisplay = document.getElementById('svgResolutionDisplay');
+        const svgQualitySlider = document.getElementById('svgQualitySlider');
+        const svgQualityValue = document.getElementById('svgQualityValue');
+        const svgBgColor = document.getElementById('svgBgColor');
+        const svgCustomColor = document.getElementById('svgCustomColor');
+        const svgPreview = document.getElementById('svgPreview');
+        const svgPreviewCanvas = document.getElementById('svgPreviewCanvas');
+        const svgButtonGroup = document.getElementById('svgButtonGroup');
+        const svgDownloadBtn = document.getElementById('svgDownloadBtn');
+        const svgResetBtn = document.getElementById('svgResetBtn');
+        const svgStatus = document.getElementById('svgStatus');
+        const svgLoader = document.getElementById('svgLoader');
+
+        let svgImage = null;
+        let svgOriginalWidth = 0;
+        let svgOriginalHeight = 0;
+
+        svgUploadArea.addEventListener('click', () => svgFileInput.click());
+        setupDragDrop(svgUploadArea, svgFileInput, 'image/svg+xml', handleSvgFile, 'SVG');
+
+        svgFileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) handleSvgFile(file);
+        });
+
+        svgScale.addEventListener('input', (e) => {
+            svgScaleValue.textContent = e.target.value + 'x';
+            if (svgImage) renderSvgImage();
+        });
+
+        svgQualitySlider.addEventListener('input', (e) => {
+            svgQualityValue.textContent = e.target.value + '%';
+        });
+
+        svgBgColor.addEventListener('change', (e) => {
+            svgCustomColor.style.display = e.target.value === 'custom' ? 'block' : 'none';
+            if (svgImage) renderSvgImage();
+        });
+
+        svgCustomColor.addEventListener('input', () => {
+            if (svgImage) renderSvgImage();
+        });
+
+        svgDownloadBtn.addEventListener('click', () => {
+            const quality = svgQualitySlider.value / 100;
+            const dataUrl = svgPreviewCanvas.toDataURL('image/jpeg', quality);
+            const link = document.createElement('a');
+            link.download = 'converted.jpg';
+            link.href = dataUrl;
+            link.click();
+            showSvgStatus('Image downloaded successfully!', 'success');
+        });
+
+        svgResetBtn.addEventListener('click', () => {
+            svgFileInput.value = '';
+            svgControls.style.display = 'none';
+            svgPreview.style.display = 'none';
+            svgButtonGroup.style.display = 'none';
+            hideSvgStatus();
+        });
+
+        function handleSvgFile(file) {
+            showSvgLoader(true);
+            hideSvgStatus();
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const svgText = e.target.result;
+                const parser = new DOMParser();
+                const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
+                const svgElement = svgDoc.documentElement;
+
+                svgOriginalWidth = parseFloat(svgElement.getAttribute('width')) || 800;
+                svgOriginalHeight = parseFloat(svgElement.getAttribute('height')) || 600;
+
+                if (!svgElement.getAttribute('width') || !svgElement.getAttribute('height')) {
+                    const viewBox = svgElement.getAttribute('viewBox');
+                    if (viewBox) {
+                        const parts = viewBox.split(/\s+|,/);
+                        svgOriginalWidth = parseFloat(parts[2]);
+                        svgOriginalHeight = parseFloat(parts[3]);
+                    }
+                }
+
+                const blob = new Blob([svgText], { type: 'image/svg+xml' });
+                const url = URL.createObjectURL(blob);
+
+                svgImage = new Image();
+                svgImage.onload = () => {
+                    URL.revokeObjectURL(url);
+                    renderSvgImage();
+                    svgControls.style.display = 'block';
+                    showSvgLoader(false);
+                    showSvgStatus('SVG loaded successfully!', 'success');
+                };
+                svgImage.onerror = () => {
+                    showSvgLoader(false);
+                    showSvgStatus('Error loading SVG image', 'error');
+                };
+                svgImage.src = url;
+            };
+            reader.readAsText(file);
+        }
+
+        function renderSvgImage() {
+            const scale = parseFloat(svgScale.value);
+            const canvas = svgPreviewCanvas;
+            const ctx = canvas.getContext('2d');
+            canvas.width = svgOriginalWidth * scale;
+            canvas.height = svgOriginalHeight * scale;
+
+            svgResolutionDisplay.textContent = `Output: ${Math.round(canvas.width)} × ${Math.round(canvas.height)} pixels`;
+
+            let bgColor = 'white';
+            if (svgBgColor.value === 'black') bgColor = 'black';
+            else if (svgBgColor.value === 'custom') bgColor = svgCustomColor.value;
+            else if (svgBgColor.value === 'transparent') bgColor = 'transparent';
+
+            if (bgColor !== 'transparent') {
+                ctx.fillStyle = bgColor;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            }
+
+            ctx.drawImage(svgImage, 0, 0, canvas.width, canvas.height);
+
+            svgPreview.style.display = 'block';
+            svgButtonGroup.style.display = 'flex';
+        }
+
+        function showSvgStatus(message, type) {
+            svgStatus.textContent = message;
+            svgStatus.className = 'status ' + type;
+            svgStatus.style.display = 'block';
+            setTimeout(() => hideSvgStatus(), 4000);
+        }
+
+        function hideSvgStatus() {
+            svgStatus.style.display = 'none';
+        }
+
+        function showSvgLoader(show) {
+            svgLoader.style.display = show ? 'block' : 'none';
+        }
+
+        // ==================== WEBP TO JPG ====================
+        const webpUploadArea = document.getElementById('webpUploadArea');
+        const webpFileInput = document.getElementById('webpFileInput');
+        const webpControls = document.getElementById('webpControls');
+        const webpQualitySlider = document.getElementById('webpQualitySlider');
+        const webpQualityValue = document.getElementById('webpQualityValue');
+        const webpPreview = document.getElementById('webpPreview');
+        const webpPreviewCanvas = document.getElementById('webpPreviewCanvas');
+        const webpButtonGroup = document.getElementById('webpButtonGroup');
+        const webpDownloadBtn = document.getElementById('webpDownloadBtn');
+        const webpResetBtn = document.getElementById('webpResetBtn');
+        const webpStatus = document.getElementById('webpStatus');
+        const webpLoader = document.getElementById('webpLoader');
+
+        let webpImage = null;
+
+        webpUploadArea.addEventListener('click', () => webpFileInput.click());
+        setupDragDrop(webpUploadArea, webpFileInput, 'image/webp', handleWebpFile, 'WebP');
+
+        webpFileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) handleWebpFile(file);
+        });
+
+        webpQualitySlider.addEventListener('input', (e) => {
+            webpQualityValue.textContent = e.target.value + '%';
+        });
+
+        webpDownloadBtn.addEventListener('click', () => {
+            const quality = webpQualitySlider.value / 100;
+            const dataUrl = webpPreviewCanvas.toDataURL('image/jpeg', quality);
+            const link = document.createElement('a');
+            link.download = 'converted.jpg';
+            link.href = dataUrl;
+            link.click();
+            showWebpStatus('Image downloaded successfully!', 'success');
+        });
+
+        webpResetBtn.addEventListener('click', () => {
+            webpFileInput.value = '';
+            webpControls.style.display = 'none';
+            webpPreview.style.display = 'none';
+            webpButtonGroup.style.display = 'none';
+            hideWebpStatus();
+        });
+
+        function handleWebpFile(file) {
+            showWebpLoader(true);
+            hideWebpStatus();
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                webpImage = new Image();
+                webpImage.onload = () => {
+                    renderWebpImage();
+                    webpControls.style.display = 'block';
+                    showWebpLoader(false);
+                    showWebpStatus('WebP loaded successfully!', 'success');
+                };
+                webpImage.onerror = () => {
+                    showWebpLoader(false);
+                    showWebpStatus('Error loading WebP image', 'error');
+                };
+                webpImage.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function renderWebpImage() {
+            const canvas = webpPreviewCanvas;
+            const ctx = canvas.getContext('2d');
+            canvas.width = webpImage.width;
+            canvas.height = webpImage.height;
+
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(webpImage, 0, 0);
+
+            webpPreview.style.display = 'block';
+            webpButtonGroup.style.display = 'flex';
+        }
+
+        function showWebpStatus(message, type) {
+            webpStatus.textContent = message;
+            webpStatus.className = 'status ' + type;
+            webpStatus.style.display = 'block';
+            setTimeout(() => hideWebpStatus(), 4000);
+        }
+
+        function hideWebpStatus() {
+            webpStatus.style.display = 'none';
+        }
+
+        function showWebpLoader(show) {
+            webpLoader.style.display = show ? 'block' : 'none';
+        }
+
+        // ==================== UTILITY FUNCTIONS ====================
+        function setupDragDrop(uploadArea, fileInput, mimeType, handler, typeName) {
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('dragover');
+            });
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                const file = e.dataTransfer.files[0];
+                if (file && file.type === mimeType) {
+                    handler(file);
+                } else {
+                    alert(`Please upload a valid ${typeName} file`);
+                }
+            });
+        }
+        }); // <-- FIX: Correctly closing document.addEventListener('DOMContentLoaded', function() { ... }
+    </script>
+</body>
 </html>
