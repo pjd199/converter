@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Image Converter Suite</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
+
     <style>
         * {
             margin: 0;
@@ -24,7 +28,8 @@
             border-radius: 20px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             padding: 40px;
-            max-width: 800px;
+            /* Increased max-width for better two-column display */
+            max-width: 1100px; 
             width: 100%;
             margin: 0 auto;
         }
@@ -93,6 +98,17 @@
             display: block;
         }
 
+        /* Original Converter Page Title and Subtitle (Now Hidden) */
+        /* These classes are now only used for the old, hidden elements to save space */
+        .converter-page h1, .converter-page .page-subtitle {
+            display: none;
+        }
+        /* Re-enable for the welcome page */
+        .welcome-page h1, .welcome-page .subtitle {
+            display: block !important;
+            text-align: center;
+        }
+        
         .back-button {
             display: inline-flex;
             align-items: center;
@@ -105,26 +121,12 @@
             font-weight: 600;
             cursor: pointer;
             color: #333;
-            margin-bottom: 20px;
+            margin-bottom: 10px; /* Reduced margin */
             transition: all 0.3s ease;
         }
 
         .back-button:hover {
             background: #e0e0e0;
-        }
-
-        h1 {
-            color: #333;
-            margin-bottom: 10px;
-            font-size: 28px;
-            text-align: center;
-        }
-
-        .page-subtitle {
-            color: #666;
-            text-align: center;
-            margin-bottom: 30px;
-            font-size: 14px;
         }
 
         .upload-area {
@@ -135,6 +137,8 @@
             cursor: pointer;
             transition: all 0.3s ease;
             background: #f8f9ff;
+            max-width: 600px; /* Constrain upload box width */
+            margin: 0 auto; /* Center upload box */
         }
 
         .upload-area:hover {
@@ -169,10 +173,76 @@
             display: none;
         }
 
-        .controls {
+        /* --- GENERIC INTERFACE LAYOUT STYLES --- */
+        .converter-interface {
+            display: none; /* Controlled by JS to appear after upload */
+            gap: 30px; 
             margin-top: 25px;
-            display: none;
+            align-items: flex-start;
+            flex-wrap: wrap; /* Allows wrap on small screens */
         }
+
+        .controls-panel {
+            flex: 0 0 250px; /* Fixed width for controls */
+            padding-right: 10px; /* Padding for separation */
+        }
+
+        .preview-panel {
+            flex: 1; /* Takes up remaining space */
+            min-width: 0; 
+        }
+
+        /* Styling for titles moved into the Controls Panel */
+        .controls-panel .sidebar-title {
+            color: #333;
+            margin-top: 10px; 
+            margin-bottom: 5px;
+            font-size: 24px;
+            text-align: left;
+        }
+
+        .controls-panel .sidebar-subtitle {
+            color: #666;
+            text-align: left;
+            margin-bottom: 20px;
+            font-size: 13px;
+        }
+
+        .controls {
+            margin-top: 0; 
+            display: block !important; 
+        }
+        
+        .preview {
+            margin-top: 0; 
+        }
+        
+        /* Styling for button group in the controls panel (stacked) */
+        .controls-panel .button-group {
+            margin-top: 25px;
+            display: flex !important; 
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .controls-panel .button-group button {
+            flex: none; 
+        }
+
+
+        /* Media query for smaller screens, stacks panels */
+        @media (max-width: 768px) {
+            .converter-interface {
+                flex-direction: column;
+                gap: 20px;
+            }
+            .controls-panel {
+                flex: 1 1 100%;
+                max-width: 100%;
+            }
+        }
+        /* --- END GENERIC INTERFACE LAYOUT STYLES --- */
+
 
         .control-group {
             margin-bottom: 20px;
@@ -222,9 +292,35 @@
             text-align: center;
         }
 
-        .preview {
-            margin-top: 25px;
-            display: none;
+        /* Ratio Button Styles (Specific to Cropper) */
+        .ratio-button-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .ratio-button {
+            padding: 10px 15px;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            background-color: white;
+            color: #667eea;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            flex: 1;
+            min-width: 80px;
+        }
+
+        .ratio-button:hover {
+            background-color: #f0f1ff;
+        }
+        
+        .ratio-button.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #764ba2;
         }
 
         .preview-title {
@@ -234,15 +330,30 @@
             font-size: 16px;
         }
 
+        /* Styling for all preview content */
         .preview-canvas, .preview-image {
             max-width: 100%;
             border-radius: 10px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         }
+        
+        /* Cropper.js specific container styling for viewport visibility */
+        .cropper-container-wrapper {
+            /* Limits the maximum height to ensure the whole preview is visible */
+            max-height: 450px; 
+            margin: 0 auto;
+        }
+
+        .cropper-container-wrapper img {
+            /* The image passed to Cropper must have max-width: 100% and be display: block */
+            display: block;
+            max-width: 100%;
+            height: auto;
+        }
+
 
         .button-group {
-            margin-top: 25px;
-            display: none;
+            /* Note: display:none removed from here, now controlled by .controls-panel .button-group */
             gap: 10px;
         }
 
@@ -319,6 +430,12 @@
             <p class="subtitle">Professional image conversion tools - all in your browser</p>
 
             <div class="converter-grid">
+                <div class="converter-card" data-converter="crop">
+                    <div class="icon">✂️</div>
+                    <div class="title">JPG Cropper</div>
+                    <div class="description">Crop and resize JPG images</div>
+                </div>
+
                 <div class="converter-card" data-converter="pdf">
                     <div class="icon">📄</div>
                     <div class="title">PDF to JPG</div>
@@ -345,11 +462,67 @@
             </div>
         </div>
 
-        <div class="converter-page" id="pdfConverter">
-            <button class="back-button" onclick="showWelcome()">← Back to Home</button>
-            <h1>PDF to JPG Converter</h1>
-            <p class="page-subtitle">Convert your PDF pages to high-quality JPG images</p>
+        <div class="converter-page" id="cropConverter">
+            <div class="upload-area" id="cropUploadArea">
+                <div class="upload-icon">🖼️</div>
+                <div class="upload-text">Click to upload or drag and drop</div>
+                <div class="upload-subtext">JPG files only</div>
+            </div>
 
+            <input type="file" id="cropFileInput" class="file-input" accept="image/jpeg">
+
+            <div class="converter-interface" id="cropInterface">
+                
+                <div class="controls-panel">
+                    <button class="back-button" onclick="showWelcome()">← Back to Home</button>
+                    <h1 class="sidebar-title">JPG Cropper</h1>
+                    <p class="sidebar-subtitle">Crop your JPG image to popular aspect ratios</p>
+
+                    <div class="controls" id="cropControls">
+                        
+                        <div class="control-group">
+                            <label>Aspect Ratio:</label>
+                            <div class="ratio-button-group" id="cropRatioButtonGroup">
+                                <button class="ratio-button active" data-ratio="16/9">16:9</button>
+                                <button class="ratio-button" data-ratio="1/1">1:1</button>
+                                <button class="ratio-button" data-ratio="original">Original</button>
+                                <button class="ratio-button" data-ratio="free">Free Crop</button>
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <label for="cropResolutionSlider">
+                                Output Width: <span class="quality-value" id="cropResolutionValue">1000px</span>
+                            </label>
+                            <input type="range" id="cropResolutionSlider" min="400" max="2000" step="100" value="1000">
+                            <div class="resolution-display" id="cropResolutionDisplay">Output Dimensions: 1000 × 563 pixels</div>
+                        </div>
+
+                    </div>
+                    
+                    <div class="button-group" id="cropButtonGroup">
+                        <button class="btn-primary" id="cropDownloadBtn">Crop & Download JPG</button>
+                        <button class="btn-secondary" id="cropResetBtn">Upload New JPG</button>
+                    </div>
+                </div>
+
+                <div class="preview-panel">
+                    <div class="loader" id="cropLoader"></div>
+
+                    <div class="preview" id="cropPreview">
+                        <div class="preview-title">Crop Area:</div>
+                        <div class="cropper-container-wrapper">
+                            <img id="cropImage" alt="Image to crop" style="max-width: 100%;"> 
+                        </div>
+                    </div>
+
+                    </div>
+            </div>
+
+            <div class="status" id="cropStatus"></div>
+        </div>
+
+        <div class="converter-page" id="pdfConverter">
             <div class="upload-area" id="pdfUploadArea">
                 <div class="upload-icon">📄</div>
                 <div class="upload-text">Click to upload or drag and drop</div>
@@ -357,47 +530,53 @@
             </div>
 
             <input type="file" id="pdfFileInput" class="file-input" accept="application/pdf">
+            
+            <div class="converter-interface" id="pdfInterface">
+                <div class="controls-panel">
+                    <button class="back-button" onclick="showWelcome()">← Back to Home</button>
+                    <h1 class="sidebar-title">PDF to JPG Converter</h1>
+                    <p class="sidebar-subtitle">Convert your PDF pages to high-quality JPG images</p>
 
-            <div class="controls" id="pdfControls">
-                <div class="control-group">
-                    <label for="pdfPageSelect">Select Page:</label>
-                    <select id="pdfPageSelect"></select>
+                    <div class="controls" id="pdfControls">
+                        <div class="control-group">
+                            <label for="pdfPageSelect">Select Page:</label>
+                            <select id="pdfPageSelect"></select>
+                        </div>
+                        <div class="control-group">
+                            <label for="pdfResolutionSlider">
+                                Resolution: <span class="quality-value" id="pdfResolutionValue">2x</span>
+                            </label>
+                            <input type="range" id="pdfResolutionSlider" min="1" max="5" step="0.5" value="2">
+                            <div class="resolution-display" id="pdfResolutionDisplay">Output: Calculating...</div>
+                        </div>
+                        <div class="control-group">
+                            <label for="pdfQualitySlider">
+                                Image Quality: <span class="quality-value" id="pdfQualityValue">90%</span>
+                            </label>
+                            <input type="range" id="pdfQualitySlider" min="10" max="100" value="90">
+                        </div>
+                    </div>
+
+                    <div class="button-group" id="pdfButtonGroup">
+                        <button class="btn-primary" id="pdfDownloadBtn">Download JPG</button>
+                        <button class="btn-secondary" id="pdfResetBtn">Upload New PDF</button>
+                    </div>
                 </div>
-                <div class="control-group">
-                    <label for="pdfResolutionSlider">
-                        Resolution: <span class="quality-value" id="pdfResolutionValue">2x</span>
-                    </label>
-                    <input type="range" id="pdfResolutionSlider" min="1" max="5" step="0.5" value="2">
-                    <div class="resolution-display" id="pdfResolutionDisplay">Output: Calculating...</div>
-                </div>
-                <div class="control-group">
-                    <label for="pdfQualitySlider">
-                        Image Quality: <span class="quality-value" id="pdfQualityValue">90%</span>
-                    </label>
-                    <input type="range" id="pdfQualitySlider" min="10" max="100" value="90">
-                </div>
-            </div>
 
-            <div class="loader" id="pdfLoader"></div>
+                <div class="preview-panel">
+                    <div class="loader" id="pdfLoader"></div>
 
-            <div class="preview" id="pdfPreview">
-                <div class="preview-title">Preview:</div>
-                <canvas id="pdfPreviewCanvas" class="preview-canvas"></canvas>
-            </div>
-
-            <div class="button-group" id="pdfButtonGroup">
-                <button class="btn-primary" id="pdfDownloadBtn">Download JPG</button>
-                <button class="btn-secondary" id="pdfResetBtn">Upload New PDF</button>
+                    <div class="preview" id="pdfPreview">
+                        <div class="preview-title">Preview:</div>
+                        <canvas id="pdfPreviewCanvas" class="preview-canvas"></canvas>
+                    </div>
+                    </div>
             </div>
 
             <div class="status" id="pdfStatus"></div>
         </div>
 
         <div class="converter-page" id="pngConverter">
-            <button class="back-button" onclick="showWelcome()">← Back to Home</button>
-            <h1>PNG to JPG Converter</h1>
-            <p class="page-subtitle">Convert PNG images to JPG format</p>
-
             <div class="upload-area" id="pngUploadArea">
                 <div class="upload-icon">🖼️</div>
                 <div class="upload-text">Click to upload or drag and drop</div>
@@ -406,44 +585,49 @@
 
             <input type="file" id="pngFileInput" class="file-input" accept="image/png">
 
-            <div class="controls" id="pngControls">
-                <div class="control-group">
-                    <label for="pngQualitySlider">
-                        Image Quality: <span class="quality-value" id="pngQualityValue">90%</span>
-                    </label>
-                    <input type="range" id="pngQualitySlider" min="10" max="100" value="90">
+            <div class="converter-interface" id="pngInterface">
+                <div class="controls-panel">
+                    <button class="back-button" onclick="showWelcome()">← Back to Home</button>
+                    <h1 class="sidebar-title">PNG to JPG Converter</h1>
+                    <p class="sidebar-subtitle">Convert PNG images to JPG format</p>
+                    <div class="controls" id="pngControls">
+                        <div class="control-group">
+                            <label for="pngQualitySlider">
+                                Image Quality: <span class="quality-value" id="pngQualityValue">90%</span>
+                            </label>
+                            <input type="range" id="pngQualitySlider" min="10" max="100" value="90">
+                        </div>
+                        <div class="control-group">
+                            <label for="pngBgColor">Background Color (for transparency):</label>
+                            <select id="pngBgColor">
+                                <option value="white">White</option>
+                                <option value="black">Black</option>
+                                <option value="custom">Custom...</option>
+                            </select>
+                            <input type="color" id="pngCustomColor" value="#ffffff" style="width: 100%; margin-top: 10px; display: none;">
+                        </div>
+                    </div>
+
+                    <div class="button-group" id="pngButtonGroup">
+                        <button class="btn-primary" id="pngDownloadBtn">Download JPG</button>
+                        <button class="btn-secondary" id="pngResetBtn">Upload New PNG</button>
+                    </div>
                 </div>
-                <div class="control-group">
-                    <label for="pngBgColor">Background Color (for transparency):</label>
-                    <select id="pngBgColor">
-                        <option value="white">White</option>
-                        <option value="black">Black</option>
-                        <option value="custom">Custom...</option>
-                    </select>
-                    <input type="color" id="pngCustomColor" value="#ffffff" style="width: 100%; margin-top: 10px; display: none;">
-                </div>
-            </div>
 
-            <div class="loader" id="pngLoader"></div>
+                <div class="preview-panel">
+                    <div class="loader" id="pngLoader"></div>
 
-            <div class="preview" id="pngPreview">
-                <div class="preview-title">Preview:</div>
-                <canvas id="pngPreviewCanvas" class="preview-canvas"></canvas>
-            </div>
-
-            <div class="button-group" id="pngButtonGroup">
-                <button class="btn-primary" id="pngDownloadBtn">Download JPG</button>
-                <button class="btn-secondary" id="pngResetBtn">Upload New PNG</button>
+                    <div class="preview" id="pngPreview">
+                        <div class="preview-title">Preview:</div>
+                        <canvas id="pngPreviewCanvas" class="preview-canvas"></canvas>
+                    </div>
+                    </div>
             </div>
 
             <div class="status" id="pngStatus"></div>
         </div>
 
         <div class="converter-page" id="svgConverter">
-            <button class="back-button" onclick="showWelcome()">← Back to Home</button>
-            <h1>SVG to JPG Converter</h1>
-            <p class="page-subtitle">Convert vector SVG graphics to JPG images</p>
-
             <div class="upload-area" id="svgUploadArea">
                 <div class="upload-icon">✨</div>
                 <div class="upload-text">Click to upload or drag and drop</div>
@@ -452,52 +636,57 @@
 
             <input type="file" id="svgFileInput" class="file-input" accept="image/svg+xml">
 
-            <div class="controls" id="svgControls">
-                <div class="control-group">
-                    <label for="svgScale">
-                        Scale: <span class="quality-value" id="svgScaleValue">2x</span>
-                    </label>
-                    <input type="range" id="svgScale" min="1" max="5" step="0.5" value="2">
-                    <div class="resolution-display" id="svgResolutionDisplay">Output: Calculating...</div>
-                </div>
-                <div class="control-group">
-                    <label for="svgQualitySlider">
-                        Image Quality: <span class="quality-value" id="svgQualityValue">90%</span>
-                    </label>
-                    <input type="range" id="svgQualitySlider" min="10" max="100" value="90">
-                </div>
-                <div class="control-group">
-                    <label for="svgBgColor">Background Color:</label>
-                    <select id="svgBgColor">
-                        <option value="white">White</option>
-                        <option value="black">Black</option>
-                        <option value="transparent">Transparent (if supported)</option>
-                        <option value="custom">Custom...</option>
-                    </select>
-                    <input type="color" id="svgCustomColor" value="#ffffff" style="width: 100%; margin-top: 10px; display: none;">
-                </div>
-            </div>
+            <div class="converter-interface" id="svgInterface">
+                <div class="controls-panel">
+                    <button class="back-button" onclick="showWelcome()">← Back to Home</button>
+                    <h1 class="sidebar-title">SVG to JPG Converter</h1>
+                    <p class="sidebar-subtitle">Convert vector SVG graphics to JPG images</p>
+                    <div class="controls" id="svgControls">
+                        <div class="control-group">
+                            <label for="svgScale">
+                                Scale: <span class="quality-value" id="svgScaleValue">2x</span>
+                            </label>
+                            <input type="range" id="svgScale" min="1" max="5" step="0.5" value="2">
+                            <div class="resolution-display" id="svgResolutionDisplay">Output: Calculating...</div>
+                        </div>
+                        <div class="control-group">
+                            <label for="svgQualitySlider">
+                                Image Quality: <span class="quality-value" id="svgQualityValue">90%</span>
+                            </label>
+                            <input type="range" id="svgQualitySlider" min="10" max="100" value="90">
+                        </div>
+                        <div class="control-group">
+                            <label for="svgBgColor">Background Color:</label>
+                            <select id="svgBgColor">
+                                <option value="white">White</option>
+                                <option value="black">Black</option>
+                                <option value="transparent">Transparent (if supported)</option>
+                                <option value="custom">Custom...</option>
+                            </select>
+                            <input type="color" id="svgCustomColor" value="#ffffff" style="width: 100%; margin-top: 10px; display: none;">
+                        </div>
+                    </div>
 
-            <div class="loader" id="svgLoader"></div>
+                    <div class="button-group" id="svgButtonGroup">
+                        <button class="btn-primary" id="svgDownloadBtn">Download JPG</button>
+                        <button class="btn-secondary" id="svgResetBtn">Upload New SVG</button>
+                    </div>
+                </div>
 
-            <div class="preview" id="svgPreview">
-                <div class="preview-title">Preview:</div>
-                <canvas id="svgPreviewCanvas" class="preview-canvas"></canvas>
-            </div>
+                <div class="preview-panel">
+                    <div class="loader" id="svgLoader"></div>
 
-            <div class="button-group" id="svgButtonGroup">
-                <button class="btn-primary" id="svgDownloadBtn">Download JPG</button>
-                <button class="btn-secondary" id="svgResetBtn">Upload New SVG</button>
+                    <div class="preview" id="svgPreview">
+                        <div class="preview-title">Preview:</div>
+                        <canvas id="svgPreviewCanvas" class="preview-canvas"></canvas>
+                    </div>
+                    </div>
             </div>
 
             <div class="status" id="svgStatus"></div>
         </div>
 
         <div class="converter-page" id="webpConverter">
-            <button class="back-button" onclick="showWelcome()">← Back to Home</button>
-            <h1>WebP to JPG Converter</h1>
-            <p class="page-subtitle">Convert modern WebP images to JPG format</p>
-
             <div class="upload-area" id="webpUploadArea">
                 <div class="upload-icon">🌐</div>
                 <div class="upload-text">Click to upload or drag and drop</div>
@@ -506,25 +695,34 @@
 
             <input type="file" id="webpFileInput" class="file-input" accept="image/webp">
 
-            <div class="controls" id="webpControls">
-                <div class="control-group">
-                    <label for="webpQualitySlider">
-                        Image Quality: <span class="quality-value" id="webpQualityValue">90%</span>
-                    </label>
-                    <input type="range" id="webpQualitySlider" min="10" max="100" value="90">
+            <div class="converter-interface" id="webpInterface">
+                <div class="controls-panel">
+                    <button class="back-button" onclick="showWelcome()">← Back to Home</button>
+                    <h1 class="sidebar-title">WebP to JPG Converter</h1>
+                    <p class="sidebar-subtitle">Convert modern WebP images to JPG format</p>
+                    <div class="controls" id="webpControls">
+                        <div class="control-group">
+                            <label for="webpQualitySlider">
+                                Image Quality: <span class="quality-value" id="webpQualityValue">90%</span>
+                            </label>
+                            <input type="range" id="webpQualitySlider" min="10" max="100" value="90">
+                        </div>
+                    </div>
+
+                    <div class="button-group" id="webpButtonGroup">
+                        <button class="btn-primary" id="webpDownloadBtn">Download JPG</button>
+                        <button class="btn-secondary" id="webpResetBtn">Upload New WebP</button>
+                    </div>
                 </div>
-            </div>
 
-            <div class="loader" id="webpLoader"></div>
+                <div class="preview-panel">
+                    <div class="loader" id="webpLoader"></div>
 
-            <div class="preview" id="webpPreview">
-                <div class="preview-title">Preview:</div>
-                <canvas id="webpPreviewCanvas" class="preview-canvas"></canvas>
-            </div>
-
-            <div class="button-group" id="webpButtonGroup">
-                <button class="btn-primary" id="webpDownloadBtn">Download JPG</button>
-                <button class="btn-secondary" id="webpResetBtn">Upload New WebP</button>
+                    <div class="preview" id="webpPreview">
+                        <div class="preview-title">Preview:</div>
+                        <canvas id="webpPreviewCanvas" class="preview-canvas"></canvas>
+                    </div>
+                    </div>
             </div>
 
             <div class="status" id="webpStatus"></div>
@@ -554,13 +752,215 @@
 
             document.querySelectorAll('.converter-card').forEach(card => {
                 card.addEventListener('click', () => {
+                    // Reset any active cropper instance when navigating away
+                    if (cropper) {
+                        cropper.destroy();
+                        cropper = null;
+                        cropImage.src = '';
+                    }
                     showConverter(card.dataset.converter);
                 });
             });
 
+        // ==================== JPG CROPPER ====================
+        const cropUploadArea = document.getElementById('cropUploadArea');
+        const cropFileInput = document.getElementById('cropFileInput');
+        const cropInterface = document.getElementById('cropInterface'); 
+        const cropControls = document.getElementById('cropControls');
+        const cropRatioButtonGroup = document.getElementById('cropRatioButtonGroup'); 
+        const cropResolutionSlider = document.getElementById('cropResolutionSlider'); 
+        const cropResolutionValue = document.getElementById('cropResolutionValue'); 
+        const cropResolutionDisplay = document.getElementById('cropResolutionDisplay'); 
+        const cropImage = document.getElementById('cropImage');
+        const cropPreview = document.getElementById('cropPreview');
+        const cropButtonGroup = document.getElementById('cropButtonGroup');
+        const cropDownloadBtn = document.getElementById('cropDownloadBtn');
+        const cropResetBtn = document.getElementById('cropResetBtn');
+        const cropStatus = document.getElementById('cropStatus');
+        const cropLoader = document.getElementById('cropLoader');
+
+        let cropper = null;
+        let originalFileName = '';
+
+        function showCropStatus(message, type) {
+            cropStatus.textContent = message;
+            cropStatus.className = 'status ' + type;
+            cropStatus.style.display = 'block';
+            setTimeout(() => hideCropStatus(), 4000);
+        }
+        function hideCropStatus() {
+            cropStatus.style.display = 'none';
+        }
+        function showCropLoader(show) {
+            cropLoader.style.display = show ? 'block' : 'none';
+        }
+
+        function updateCropResolutionDisplay() {
+            if (!cropper) return;
+            
+            const desiredWidth = parseInt(cropResolutionSlider.value);
+            cropResolutionValue.textContent = desiredWidth + 'px';
+
+            const cropData = cropper.getData(true);
+            
+            if (cropData.height === 0 || cropData.width === 0) {
+                cropResolutionDisplay.textContent = `Output Dimensions: ${desiredWidth} × N/A pixels (Adjust crop area)`;
+                return;
+            }
+
+            const currentCropRatio = cropData.width / cropData.height; 
+            const desiredHeight = Math.round(desiredWidth / currentCropRatio);
+            
+            cropResolutionDisplay.textContent = `Output Dimensions: ${desiredWidth} × ${desiredHeight} pixels`;
+        }
+
+
+        // 1. Upload/Drag-Drop setup (Explicit click listeners removed, now handled solely by setupDragDrop)
+        setupDragDrop(cropUploadArea, cropFileInput, 'image/jpeg', handleCropFile, 'JPG');
+
+        cropFileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) handleCropFile(file);
+        });
+
+        function handleCropFile(file) {
+            showCropLoader(true);
+            hideCropStatus();
+            cropUploadArea.style.display = 'none'; 
+
+            originalFileName = file.name.replace(/\.[^/.]+$/, '');
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                if (cropper) {
+                    cropper.destroy();
+                }
+                
+                cropImage.src = e.target.result;
+                
+                cropImage.onload = () => {
+                    cropper = new Cropper(cropImage, {
+                        aspectRatio: 16 / 9, 
+                        viewMode: 1, 
+                        autoCropArea: 0.9, 
+                        movable: true,
+                        scalable: true,
+                        zoomable: true,
+                        cropBoxMovable: true,
+                        cropBoxResizable: true,
+                        background: false,
+                        crop: updateCropResolutionDisplay,
+                        ready: () => {
+                            updateCropResolutionDisplay();
+                        }
+                    });
+
+                    cropInterface.style.display = 'flex'; 
+                    cropControls.style.display = 'block'; 
+                    cropPreview.style.display = 'block'; 
+                    // button group is now managed by its parent container CSS
+
+                    cropRatioButtonGroup.querySelectorAll('.ratio-button').forEach(btn => btn.classList.remove('active'));
+                    document.querySelector('.ratio-button[data-ratio="16/9"]').classList.add('active');
+                    
+                    showCropLoader(false);
+                    showCropStatus('Image loaded. Select and adjust your crop area.', 'success');
+                };
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // 4. Aspect Ratio Button Listener & Logic
+        cropRatioButtonGroup.querySelectorAll('.ratio-button').forEach(button => {
+            button.addEventListener('click', (e) => {
+                if (!cropper) return;
+                
+                cropRatioButtonGroup.querySelectorAll('.ratio-button').forEach(btn => btn.classList.remove('active'));
+                e.target.classList.add('active');
+
+                const ratioType = e.target.dataset.ratio;
+                let aspectRatio = NaN;
+
+                if (ratioType === 'original') {
+                    aspectRatio = cropper.getImageData().naturalWidth / cropper.getImageData().naturalHeight;
+                    cropper.setAspectRatio(aspectRatio);
+                } else if (ratioType === 'free') {
+                    aspectRatio = NaN;
+                    cropper.setAspectRatio(aspectRatio);
+                } else {
+                    const parts = ratioType.split('/');
+                    aspectRatio = parseFloat(parts[0]) / parseFloat(parts[1]);
+                    cropper.setAspectRatio(aspectRatio);
+                }
+                
+                updateCropResolutionDisplay();
+            });
+        });
+
+        // 5. Resolution Slider Listener
+        cropResolutionSlider.addEventListener('input', updateCropResolutionDisplay);
+        
+        // 6. Download Button Logic
+        cropDownloadBtn.addEventListener('click', () => {
+            if (!cropper) {
+                showCropStatus('Please upload and crop an image first.', 'error');
+                return;
+            }
+
+            showCropLoader(true);
+
+            const cropData = cropper.getData(true);
+            const currentRatio = cropData.width / cropData.height;
+            
+            const desiredWidth = parseInt(cropResolutionSlider.value);
+            const desiredHeight = Math.round(desiredWidth / currentRatio);
+
+            // Resolution Tag for filename
+            const resolutionTag = `[${desiredWidth}x${desiredHeight}]`;
+            
+            const croppedCanvas = cropper.getCroppedCanvas({
+                width: desiredWidth,
+                height: desiredHeight
+            });
+            
+            const quality = 0.95; 
+            
+            croppedCanvas.toBlob(function(blob) {
+                const link = document.createElement('a');
+                link.download = `${originalFileName}-${resolutionTag}.jpg`; 
+                link.href = URL.createObjectURL(blob);
+                link.click();
+                URL.revokeObjectURL(link.href);
+                
+                showCropLoader(false);
+                showCropStatus('Cropped image downloaded successfully!', 'success');
+            }, 'image/jpeg', quality);
+        });
+
+        // 7. Reset Button Logic
+        cropResetBtn.addEventListener('click', () => {
+            if (cropper) {
+                cropper.destroy();
+                cropper = null;
+            }
+            cropFileInput.value = '';
+            originalFileName = '';
+            cropImage.src = ''; 
+            
+            cropInterface.style.display = 'none'; 
+            cropUploadArea.style.display = 'block'; 
+            hideCropStatus();
+            
+            cropRatioButtonGroup.querySelectorAll('.ratio-button').forEach(btn => btn.classList.remove('active'));
+            document.querySelector('.ratio-button[data-ratio="16/9"]').classList.add('active');
+            cropResolutionSlider.value = "1000";
+            cropResolutionDisplay.textContent = "Output Dimensions: 1000 × 563 pixels";
+        });
+
         // ==================== PDF TO JPG ====================
         const pdfUploadArea = document.getElementById('pdfUploadArea');
         const pdfFileInput = document.getElementById('pdfFileInput');
+        const pdfInterface = document.getElementById('pdfInterface'); 
         const pdfControls = document.getElementById('pdfControls');
         const pdfPageSelect = document.getElementById('pdfPageSelect');
         const pdfResolutionSlider = document.getElementById('pdfResolutionSlider');
@@ -579,22 +979,8 @@
         let pdfDoc = null;
         let currentPage = 1;
 
-        pdfUploadArea.addEventListener('click', () => pdfFileInput.click());
-        pdfUploadArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            pdfUploadArea.classList.add('dragover');
-        });
-        pdfUploadArea.addEventListener('dragleave', () => pdfUploadArea.classList.remove('dragover'));
-        pdfUploadArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            pdfUploadArea.classList.remove('dragover');
-            const file = e.dataTransfer.files[0];
-            if (file && file.type === 'application/pdf') {
-                handlePdfFile(file);
-            } else {
-                showPdfStatus('Please upload a valid PDF file', 'error');
-            }
-        });
+        // Explicit click listeners removed
+        setupDragDrop(pdfUploadArea, pdfFileInput, 'application/pdf', handlePdfFile, 'PDF');
 
         pdfFileInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
@@ -617,25 +1003,29 @@
 
         pdfDownloadBtn.addEventListener('click', () => {
             const quality = pdfQualitySlider.value / 100;
-            const dataUrl = pdfPreviewCanvas.toDataURL('image/jpeg', quality);
             const link = document.createElement('a');
-            link.download = `page-${currentPage}.jpg`;
-            link.href = dataUrl;
-            link.click();
-            showPdfStatus('Image downloaded successfully!', 'success');
+            const resolutionText = pdfResolutionDisplay.textContent.split(': ')[1].replace(' pixels', '').replace(' × ', 'x');
+            link.download = `page-${currentPage}-${resolutionText}.jpg`;
+            
+            pdfPreviewCanvas.toBlob(function(blob) {
+                link.href = URL.createObjectURL(blob);
+                link.click();
+                URL.revokeObjectURL(link.href);
+                showPdfStatus('Image downloaded successfully!', 'success');
+            }, 'image/jpeg', quality);
         });
 
         pdfResetBtn.addEventListener('click', () => {
             pdfFileInput.value = '';
-            pdfControls.style.display = 'none';
-            pdfPreview.style.display = 'none';
-            pdfButtonGroup.style.display = 'none';
+            pdfInterface.style.display = 'none'; 
+            pdfUploadArea.style.display = 'block'; 
             hidePdfStatus();
         });
 
         async function handlePdfFile(file) {
             showPdfLoader(true);
             hidePdfStatus();
+            pdfUploadArea.style.display = 'none'; 
 
             try {
                 const arrayBuffer = await file.arrayBuffer();
@@ -649,7 +1039,7 @@
                     pdfPageSelect.appendChild(option);
                 }
 
-                pdfControls.style.display = 'block';
+                pdfInterface.style.display = 'flex'; 
                 currentPage = 1;
                 await renderPdfPage(currentPage);
                 
@@ -657,6 +1047,7 @@
                 showPdfStatus('PDF loaded successfully!', 'success');
             } catch (error) {
                 showPdfLoader(false);
+                pdfUploadArea.style.display = 'block'; 
                 showPdfStatus('Error loading PDF: ' + error.message, 'error');
             }
         }
@@ -708,6 +1099,7 @@
         // ==================== PNG TO JPG ====================
         const pngUploadArea = document.getElementById('pngUploadArea');
         const pngFileInput = document.getElementById('pngFileInput');
+        const pngInterface = document.getElementById('pngInterface'); 
         const pngControls = document.getElementById('pngControls');
         const pngQualitySlider = document.getElementById('pngQualitySlider');
         const pngQualityValue = document.getElementById('pngQualityValue');
@@ -723,7 +1115,7 @@
 
         let pngImage = null;
 
-        pngUploadArea.addEventListener('click', () => pngFileInput.click());
+        // Explicit click listeners removed
         setupDragDrop(pngUploadArea, pngFileInput, 'image/png', handlePngFile, 'PNG');
 
         pngFileInput.addEventListener('change', (e) => {
@@ -746,37 +1138,40 @@
 
         pngDownloadBtn.addEventListener('click', () => {
             const quality = pngQualitySlider.value / 100;
-            const dataUrl = pngPreviewCanvas.toDataURL('image/jpeg', quality);
             const link = document.createElement('a');
             link.download = 'converted.jpg';
-            link.href = dataUrl;
-            link.click();
-            showPngStatus('Image downloaded successfully!', 'success');
+            pngPreviewCanvas.toBlob(function(blob) {
+                link.href = URL.createObjectURL(blob);
+                link.click();
+                URL.revokeObjectURL(link.href);
+                showPngStatus('Image downloaded successfully!', 'success');
+            }, 'image/jpeg', quality);
         });
 
         pngResetBtn.addEventListener('click', () => {
             pngFileInput.value = '';
-            pngControls.style.display = 'none';
-            pngPreview.style.display = 'none';
-            pngButtonGroup.style.display = 'none';
+            pngInterface.style.display = 'none'; 
+            pngUploadArea.style.display = 'block'; 
             hidePngStatus();
         });
 
         function handlePngFile(file) {
             showPngLoader(true);
             hidePngStatus();
+            pngUploadArea.style.display = 'none'; 
 
             const reader = new FileReader();
             reader.onload = (e) => {
                 pngImage = new Image();
                 pngImage.onload = () => {
                     renderPngImage();
-                    pngControls.style.display = 'block';
+                    pngInterface.style.display = 'flex'; 
                     showPngLoader(false);
                     showPngStatus('PNG loaded successfully!', 'success');
                 };
                 pngImage.onerror = () => {
                     showPngLoader(false);
+                    pngUploadArea.style.display = 'block'; 
                     showPngStatus('Error loading PNG image', 'error');
                 };
                 pngImage.src = e.target.result;
@@ -820,6 +1215,7 @@
         // ==================== SVG TO JPG ====================
         const svgUploadArea = document.getElementById('svgUploadArea');
         const svgFileInput = document.getElementById('svgFileInput');
+        const svgInterface = document.getElementById('svgInterface'); 
         const svgControls = document.getElementById('svgControls');
         const svgScale = document.getElementById('svgScale');
         const svgScaleValue = document.getElementById('svgScaleValue');
@@ -840,7 +1236,7 @@
         let svgOriginalWidth = 0;
         let svgOriginalHeight = 0;
 
-        svgUploadArea.addEventListener('click', () => svgFileInput.click());
+        // Explicit click listeners removed
         setupDragDrop(svgUploadArea, svgFileInput, 'image/svg+xml', handleSvgFile, 'SVG');
 
         svgFileInput.addEventListener('change', (e) => {
@@ -868,25 +1264,28 @@
 
         svgDownloadBtn.addEventListener('click', () => {
             const quality = svgQualitySlider.value / 100;
-            const dataUrl = svgPreviewCanvas.toDataURL('image/jpeg', quality);
             const link = document.createElement('a');
-            link.download = 'converted.jpg';
-            link.href = dataUrl;
-            link.click();
-            showSvgStatus('Image downloaded successfully!', 'success');
+            const resolutionText = svgResolutionDisplay.textContent.split(': ')[1].replace(' pixels', '').replace(' × ', 'x');
+            link.download = `converted-${resolutionText}.jpg`;
+             svgPreviewCanvas.toBlob(function(blob) {
+                link.href = URL.createObjectURL(blob);
+                link.click();
+                URL.revokeObjectURL(link.href);
+                showSvgStatus('Image downloaded successfully!', 'success');
+            }, 'image/jpeg', quality);
         });
 
         svgResetBtn.addEventListener('click', () => {
             svgFileInput.value = '';
-            svgControls.style.display = 'none';
-            svgPreview.style.display = 'none';
-            svgButtonGroup.style.display = 'none';
+            svgInterface.style.display = 'none'; 
+            svgUploadArea.style.display = 'block'; 
             hideSvgStatus();
         });
 
         function handleSvgFile(file) {
             showSvgLoader(true);
             hideSvgStatus();
+            svgUploadArea.style.display = 'none'; 
 
             const reader = new FileReader();
             reader.onload = (e) => {
@@ -914,12 +1313,13 @@
                 svgImage.onload = () => {
                     URL.revokeObjectURL(url);
                     renderSvgImage();
-                    svgControls.style.display = 'block';
+                    svgInterface.style.display = 'flex'; 
                     showSvgLoader(false);
                     showSvgStatus('SVG loaded successfully!', 'success');
                 };
                 svgImage.onerror = () => {
                     showSvgLoader(false);
+                    svgUploadArea.style.display = 'block'; 
                     showSvgStatus('Error loading SVG image', 'error');
                 };
                 svgImage.src = url;
@@ -970,6 +1370,7 @@
         // ==================== WEBP TO JPG ====================
         const webpUploadArea = document.getElementById('webpUploadArea');
         const webpFileInput = document.getElementById('webpFileInput');
+        const webpInterface = document.getElementById('webpInterface'); 
         const webpControls = document.getElementById('webpControls');
         const webpQualitySlider = document.getElementById('webpQualitySlider');
         const webpQualityValue = document.getElementById('webpQualityValue');
@@ -983,7 +1384,7 @@
 
         let webpImage = null;
 
-        webpUploadArea.addEventListener('click', () => webpFileInput.click());
+        // Explicit click listeners removed
         setupDragDrop(webpUploadArea, webpFileInput, 'image/webp', handleWebpFile, 'WebP');
 
         webpFileInput.addEventListener('change', (e) => {
@@ -997,37 +1398,40 @@
 
         webpDownloadBtn.addEventListener('click', () => {
             const quality = webpQualitySlider.value / 100;
-            const dataUrl = webpPreviewCanvas.toDataURL('image/jpeg', quality);
             const link = document.createElement('a');
             link.download = 'converted.jpg';
-            link.href = dataUrl;
-            link.click();
-            showWebpStatus('Image downloaded successfully!', 'success');
+             webpPreviewCanvas.toBlob(function(blob) {
+                link.href = URL.createObjectURL(blob);
+                link.click();
+                URL.revokeObjectURL(link.href);
+                showWebpStatus('Image downloaded successfully!', 'success');
+            }, 'image/jpeg', quality);
         });
 
         webpResetBtn.addEventListener('click', () => {
             webpFileInput.value = '';
-            webpControls.style.display = 'none';
-            webpPreview.style.display = 'none';
-            webpButtonGroup.style.display = 'none';
+            webpInterface.style.display = 'none'; 
+            webpUploadArea.style.display = 'block'; 
             hideWebpStatus();
         });
 
         function handleWebpFile(file) {
             showWebpLoader(true);
             hideWebpStatus();
+            webpUploadArea.style.display = 'none'; 
 
             const reader = new FileReader();
             reader.onload = (e) => {
                 webpImage = new Image();
                 webpImage.onload = () => {
                     renderWebpImage();
-                    webpControls.style.display = 'block';
+                    webpInterface.style.display = 'flex'; 
                     showWebpLoader(false);
                     showWebpStatus('WebP loaded successfully!', 'success');
                 };
                 webpImage.onerror = () => {
                     showWebpLoader(false);
+                    webpUploadArea.style.display = 'block'; 
                     showWebpStatus('Error loading WebP image', 'error');
                 };
                 webpImage.src = e.target.result;
@@ -1066,6 +1470,9 @@
 
         // ==================== UTILITY FUNCTIONS ====================
         function setupDragDrop(uploadArea, fileInput, mimeType, handler, typeName) {
+            // FIX: This ensures clicking the upload area works correctly and is only called once per mode setup.
+            uploadArea.addEventListener('click', () => fileInput.click());
+
             uploadArea.addEventListener('dragover', (e) => {
                 e.preventDefault();
                 uploadArea.classList.add('dragover');
@@ -1084,7 +1491,7 @@
                 }
             });
         }
-        }); // <-- FIX: Correctly closing document.addEventListener('DOMContentLoaded', function() { ... }
+        }); 
     </script>
 </body>
 </html>
