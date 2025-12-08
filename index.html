@@ -164,6 +164,7 @@
                 <div class="upload-icon">🖼️</div>
                 <div class="upload-text">Click to upload or drag and drop</div>
                 <div class="upload-subtext">JPG files only</div>
+                <button id="cancelBtn" class="button btn-secondary" style="margin-top:10px">Cancel</button>
             </div>
             <input type="file" id="cropFileInput" class="file-input" accept="image/jpeg">
             <div class="converter-interface" id="cropInterface">
@@ -217,6 +218,7 @@
                 <div class="upload-icon">📄</div>
                 <div class="upload-text">Click to upload or drag and drop</div>
                 <div class="upload-subtext">PDF files only</div>
+                <button id="cancelBtn" class="button btn-secondary" style="margin-top:10px">Cancel</button>
             </div>
             <input type="file" id="pdfFileInput" class="file-input" accept="application/pdf">
             <div class="converter-interface" id="pdfInterface">
@@ -268,6 +270,7 @@
                 <div class="upload-icon">🖼️</div>
                 <div class="upload-text">Click to upload or drag and drop</div>
                 <div class="upload-subtext">PNG files only</div>
+                <button id="cancelBtn" class="button btn-secondary" style="margin-top:10px">Cancel</button>
             </div>
             <input type="file" id="pngFileInput" class="file-input" accept="image/png">
             <div class="converter-interface" id="pngInterface">
@@ -316,6 +319,7 @@
                 <div class="upload-icon">✨</div>
                 <div class="upload-text">Click to upload or drag and drop</div>
                 <div class="upload-subtext">SVG files only</div>
+                <button id="cancelBtn" class="button btn-secondary" style="margin-top:10px">Cancel</button>
             </div>
             <input type="file" id="svgFileInput" class="file-input" accept="image/svg+xml">
             <div class="converter-interface" id="svgInterface">
@@ -372,6 +376,7 @@
                 <div class="upload-icon">🌐</div>
                 <div class="upload-text">Click to upload or drag and drop</div>
                 <div class="upload-subtext">WebP files only</div>
+                <button id="cancelBtn" class="button btn-secondary" style="margin-top:10px">Cancel</button>
             </div>
             <input type="file" id="webpFileInput" class="file-input" accept="image/webp">
             <div class="converter-interface" id="webpInterface">
@@ -411,6 +416,7 @@
                 <div class="upload-icon">📄</div>
                 <div class="upload-text">Click to upload or drag and drop</div>
                 <div class="upload-subtext">A4 PDF Poster (all pages same size & orientation)</div>
+                <button id="cancelBtn" class="button btn-secondary" style="margin-top:10px">Cancel</button>
             </div>
             <input type="file" id="posterFileInput" class="file-input" accept="application/pdf">
 
@@ -471,6 +477,11 @@
                 showConverter(card.dataset.converter);
             });
         });
+        
+        function goHome() {
+            toolArea.innerHTML = "";
+        }
+        document.getElementById('cancelBtn').addEventListener('click', goHome);
 
         // ---------- Utility drag/drop ----------
         function setupDragDrop(uploadArea, fileInput, mimeType, handler, typeName) {
@@ -1139,3 +1150,4 @@
     </footer>
 </body>
 </html>
+
