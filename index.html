@@ -160,11 +160,13 @@
 
         <!-- JPG Cropper -->
         <div class="converter-page" id="cropConverter">
-            <div class="upload-area" id="cropUploadArea">
-                <div class="upload-icon">🖼️</div>
-                <div class="upload-text">Click to upload or drag and drop</div>
-                <div class="upload-subtext">JPG files only</div>
-                <button id="cancelBtn" class="button btn-secondary" style="margin-top:10px">Cancel</button>
+            <div id="cropUploadAreaInterface">
+                <div class="upload-area" id="cropUploadArea">
+                    <div class="upload-icon">🖼️</div>
+                    <div class="upload-text">Click to upload or drag and drop</div>
+                    <div class="upload-subtext">JPG files only</div>
+                </div>
+                <button class="back-button" style="margin:24px auto; display:block;" onclick="event.stopPropagation();showWelcome()">← Back to Home</button>
             </div>
             <input type="file" id="cropFileInput" class="file-input" accept="image/jpeg">
             <div class="converter-interface" id="cropInterface">
@@ -186,10 +188,10 @@
 
                         <div class="control-group">
                             <label for="cropResolutionSlider">
-                                Output Width: <span class="quality-value" id="cropResolutionValue">1000px</span>
+                                Output Width: <span class="quality-value" id="cropResolutionValue">1200px</span>
                             </label>
-                            <input type="range" id="cropResolutionSlider" min="400" max="2000" step="100" value="1000">
-                            <div class="resolution-display" id="cropResolutionDisplay">Output Dimensions: 1000 × 563 pixels</div>
+                            <input type="range" id="cropResolutionSlider" min="400" max="2000" step="100" value="1200">
+                            <div class="resolution-display" id="cropResolutionDisplay">Output Dimensions: 1200 × 676 pixels</div>
                         </div>
                     </div>
 
@@ -214,12 +216,15 @@
 
         <!-- PDF to JPG -->
         <div class="converter-page" id="pdfConverter">
-            <div class="upload-area" id="pdfUploadArea">
-                <div class="upload-icon">📄</div>
-                <div class="upload-text">Click to upload or drag and drop</div>
-                <div class="upload-subtext">PDF files only</div>
-                <button id="cancelBtn" class="button btn-secondary" style="margin-top:10px">Cancel</button>
+            <div id="pdfUploadAreaInterface">
+                <div class="upload-area" id="pdfUploadArea">
+                    <div class="upload-icon">📄</div>
+                    <div class="upload-text">Click to upload or drag and drop</div>
+                    <div class="upload-subtext">PDF files only</div>
+                </div>
+                <button class="back-button" style="margin:24px auto; display:block;" onclick="event.stopPropagation();showWelcome()">← Back to Home</button>
             </div>
+
             <input type="file" id="pdfFileInput" class="file-input" accept="application/pdf">
             <div class="converter-interface" id="pdfInterface">
                 <div class="controls-panel">
@@ -266,11 +271,13 @@
 
         <!-- PNG -->
         <div class="converter-page" id="pngConverter">
-            <div class="upload-area" id="pngUploadArea">
-                <div class="upload-icon">🖼️</div>
-                <div class="upload-text">Click to upload or drag and drop</div>
-                <div class="upload-subtext">PNG files only</div>
-                <button id="cancelBtn" class="button btn-secondary" style="margin-top:10px">Cancel</button>
+            <div id="pngUploadAreaInterface">
+                <div class="upload-area" id="pngUploadArea">
+                   <div class="upload-icon">🖼️</div>
+                    <div class="upload-text">Click to upload or drag and drop</div>
+                    <div class="upload-subtext">PNG files only</div>
+                 </div>
+                <button class="back-button" style="margin:24px auto; display:block;" onclick="event.stopPropagation();showWelcome()">← Back to Home</button>
             </div>
             <input type="file" id="pngFileInput" class="file-input" accept="image/png">
             <div class="converter-interface" id="pngInterface">
@@ -315,11 +322,13 @@
 
         <!-- SVG -->
         <div class="converter-page" id="svgConverter">
-            <div class="upload-area" id="svgUploadArea">
-                <div class="upload-icon">✨</div>
-                <div class="upload-text">Click to upload or drag and drop</div>
-                <div class="upload-subtext">SVG files only</div>
-                <button id="cancelBtn" class="button btn-secondary" style="margin-top:10px">Cancel</button>
+            <div id="svgUploadAreaInterface">
+                <div class="upload-area" id="svgUploadArea">
+                    <div class="upload-icon">✨</div>
+                    <div class="upload-text">Click to upload or drag and drop</div>
+                    <div class="upload-subtext">SVG files only</div>
+                </div>
+                <button class="back-button" style="margin:24px auto; display:block;" onclick="event.stopPropagation();showWelcome()">← Back to Home</button>
             </div>
             <input type="file" id="svgFileInput" class="file-input" accept="image/svg+xml">
             <div class="converter-interface" id="svgInterface">
@@ -372,11 +381,13 @@
 
         <!-- WEBP -->
         <div class="converter-page" id="webpConverter">
-            <div class="upload-area" id="webpUploadArea">
-                <div class="upload-icon">🌐</div>
-                <div class="upload-text">Click to upload or drag and drop</div>
-                <div class="upload-subtext">WebP files only</div>
-                <button id="cancelBtn" class="button btn-secondary" style="margin-top:10px">Cancel</button>
+            <div id="webpUploadAreaInterface">
+                <div class="upload-area" id="webpUploadArea">
+                    <div class="upload-icon">🌐</div>
+                    <div class="upload-text">Click to upload or drag and drop</div>
+                    <div class="upload-subtext">WebP files only</div>
+                </div>
+                <button class="back-button" style="margin:24px auto; display:block;" onclick="event.stopPropagation();showWelcome()">← Back to Home</button>
             </div>
             <input type="file" id="webpFileInput" class="file-input" accept="image/webp">
             <div class="converter-interface" id="webpInterface">
@@ -412,11 +423,13 @@
 
         <!-- POSTER: A4 -> 4xA6 -->
         <div class="converter-page" id="posterConverter">
-            <div class="upload-area" id="posterUploadArea">
-                <div class="upload-icon">📄</div>
-                <div class="upload-text">Click to upload or drag and drop</div>
-                <div class="upload-subtext">A4 PDF Poster (all pages same size & orientation)</div>
-                <button id="cancelBtn" class="button btn-secondary" style="margin-top:10px">Cancel</button>
+            <div id="posterUploadAreaInterface">
+                <div class="upload-area" id="posterUploadArea">
+                    <div class="upload-icon">📄</div>
+                    <div class="upload-text">Click to upload or drag and drop</div>
+                    <div class="upload-subtext">A4 PDF Poster (all pages same size & orientation)</div>
+                </div>
+                <button class="back-button" style="margin:24px auto; display:block;" onclick="event.stopPropagation();showWelcome()">← Back to Home</button>
             </div>
             <input type="file" id="posterFileInput" class="file-input" accept="application/pdf">
 
@@ -481,8 +494,7 @@
         function goHome() {
             toolArea.innerHTML = "";
         }
-        document.getElementById('cancelBtn').addEventListener('click', goHome);
-
+       
         // ---------- Utility drag/drop ----------
         function setupDragDrop(uploadArea, fileInput, mimeType, handler, typeName) {
             uploadArea.addEventListener('click', () => fileInput.click());
@@ -506,6 +518,7 @@
         // For brevity, I'm keeping full cropper/pdf/png/svg/webp logic intact as in earlier version.
         // --- (JPG cropper code) ---
         const cropUploadArea = document.getElementById('cropUploadArea');
+        const cropUploadAreaInterface = document.getElementById('cropUploadAreaInterface');
         const cropFileInput = document.getElementById('cropFileInput');
         const cropInterface = document.getElementById('cropInterface');
         const cropRatioButtonGroup = document.getElementById('cropRatioButtonGroup');
@@ -542,7 +555,7 @@
 
         function handleCropFile(file){
             showCropLoader(true);
-            cropUploadArea.style.display='none';
+            cropUploadAreaInterface.style.display='none';
             originalFileName = file.name.replace(/\.[^/.]+$/,'');
             const reader=new FileReader();
             reader.onload=(e)=>{
@@ -604,13 +617,14 @@
         cropResetBtn.addEventListener('click', ()=>{
             if(cropper){ cropper.destroy(); cropper=null; window.cropperInstance=null; }
             cropFileInput.value=''; originalFileName=''; cropImage.src='';
-            cropInterface.style.display='none'; cropUploadArea.style.display='block';
+            cropInterface.style.display='none'; cropUploadAreaInterface.style.display='block';
             cropResolutionSlider.value='1000';
             cropResolutionDisplay.textContent = 'Output Dimensions: 1000 × 563 pixels';
         });
 
         // ---------------- PDF -> JPG (existing functionality) ----------------
         const pdfUploadArea = document.getElementById('pdfUploadArea');
+        const pdfUploadAreaInterface = document.getElementById('pdfUploadAreaInterface');
         const pdfFileInput = document.getElementById('pdfFileInput');
         const pdfInterface = document.getElementById('pdfInterface');
         const pdfPageSelect = document.getElementById('pdfPageSelect');
@@ -641,7 +655,7 @@
         function showPdfLoader(show){ pdfLoader.style.display = show? 'block':'none'; }
 
         async function handlePdfFile(file){
-            showPdfLoader(true); pdfUploadArea.style.display='none';
+            showPdfLoader(true); pdfUploadAreaInterface.style.display='none';
             pdfOriginalFileName = file.name.replace(/\.[^/.]+$/,'');
             try {
                 const arrayBuffer = await file.arrayBuffer();
@@ -660,7 +674,7 @@
             } catch(err){
                 console.error(err);
                 showPdfLoader(false);
-                pdfUploadArea.style.display='block';
+                pdfUploadAreaInterface.style.display='block';
                 showPdfStatus('Error loading PDF: '+err.message,'error');
             }
         }
@@ -700,12 +714,13 @@
         });
 
         pdfResetBtn.addEventListener('click', ()=>{
-            pdfFileInput.value=''; pdfInterface.style.display='none'; pdfUploadArea.style.display='block'; pdfOriginalFileName=''; pdfDoc=null;
+            pdfFileInput.value=''; pdfInterface.style.display='none'; pdfUploadAreaInterface.style.display='block'; pdfOriginalFileName=''; pdfDoc=null;
         });
 
         // ---------------- PNG / SVG / WebP converters (kept functional) ----------------
         // PNG
         const pngUploadArea = document.getElementById('pngUploadArea');
+        const pngUploadAreaInterface = document.getElementById('pngUploadAreaInterface');
         const pngFileInput = document.getElementById('pngFileInput');
         const pngPreviewCanvas = document.getElementById('pngPreviewCanvas');
         const pngDownloadBtn = document.getElementById('pngDownloadBtn');
@@ -734,11 +749,11 @@
                     showPngLoader(false);
                     showPngStatus('PNG loaded successfully!', 'success');
                 };
-                pngImage.onerror = ()=>{ showPngLoader(false); document.getElementById('pngUploadArea').style.display='block'; showPngStatus('Error loading PNG','error'); };
+                pngImage.onerror = ()=>{ showPngLoader(false); document.getElementById('pngUploadAreaInterface').style.display='block'; showPngStatus('Error loading PNG','error'); };
                 pngImage.src = e.target.result;
             };
             reader.readAsDataURL(file);
-            document.getElementById('pngUploadArea').style.display='none';
+            document.getElementById('pngUploadAreaInterface').style.display='none';
         }
 
         function renderPngImage(){
@@ -761,13 +776,14 @@
             canvas.toBlob((blob)=>{ link.href = URL.createObjectURL(blob); link.click(); URL.revokeObjectURL(link.href); showPngStatus('Image downloaded successfully!','success'); }, 'image/jpeg', quality);
         });
 
-        document.getElementById('pngResetBtn').addEventListener('click', ()=>{ pngFileInput.value=''; document.getElementById('pngInterface').style.display='none'; document.getElementById('pngUploadArea').style.display='block'; pngOriginalFileName=''; pngImage=null; });
+        document.getElementById('pngResetBtn').addEventListener('click', ()=>{ pngFileInput.value=''; document.getElementById('pngInterface').style.display='none'; document.getElementById('pngUploadAreaInterface').style.display='block'; pngOriginalFileName=''; pngImage=null; });
 
         function showPngStatus(msg,type){ document.getElementById('pngStatus').textContent=msg; document.getElementById('pngStatus').className='status '+type; document.getElementById('pngStatus').style.display='block'; setTimeout(()=>{document.getElementById('pngStatus').style.display='none';},4000); }
         function showPngLoader(show){ document.getElementById('pngLoader').style.display = show? 'block':'none'; }
 
         // SVG
         const svgUploadArea = document.getElementById('svgUploadArea');
+        const svgUploadAreaInterface = document.getElementById('svgUploadAreaInterface');
         const svgFileInput = document.getElementById('svgFileInput');
         const svgPreviewCanvas = document.getElementById('svgPreviewCanvas');
         const svgScale = document.getElementById('svgScale');
@@ -808,11 +824,11 @@
                 const url = URL.createObjectURL(blob);
                 svgImage = new Image();
                 svgImage.onload = ()=>{ URL.revokeObjectURL(url); renderSvgImage(); document.getElementById('svgInterface').style.display='flex'; showSvgLoader(false); showSvgStatus('SVG loaded successfully!','success'); };
-                svgImage.onerror = ()=>{ showSvgLoader(false); document.getElementById('svgUploadArea').style.display='block'; showSvgStatus('Error loading SVG','error'); };
+                svgImage.onerror = ()=>{ showSvgLoader(false); document.getElementById('svgUploadAreaInterface').style.display='block'; showSvgStatus('Error loading SVG','error'); };
                 svgImage.src = url;
             };
             reader.readAsText(file);
-            document.getElementById('svgUploadArea').style.display='none';
+            document.getElementById('svgUploadAreaInterface').style.display='none';
         }
 
         function renderSvgImage(){
@@ -836,13 +852,14 @@
             canvas.toBlob((blob)=>{ link.href = URL.createObjectURL(blob); link.click(); URL.revokeObjectURL(link.href); showSvgStatus('Image downloaded successfully!','success'); }, 'image/jpeg', quality);
         });
 
-        svgResetBtn.addEventListener('click', ()=>{ svgFileInput.value=''; document.getElementById('svgInterface').style.display='none'; document.getElementById('svgUploadArea').style.display='block'; svgOriginalFileName=''; svgImage=null; });
+        svgResetBtn.addEventListener('click', ()=>{ svgFileInput.value=''; document.getElementById('svgInterface').style.display='none'; document.getElementById('svgUploadAreaInterface').style.display='block'; svgOriginalFileName=''; svgImage=null; });
 
         function showSvgStatus(msg,type){ document.getElementById('svgStatus').textContent=msg; document.getElementById('svgStatus').className='status '+type; document.getElementById('svgStatus').style.display='block'; setTimeout(()=>{document.getElementById('svgStatus').style.display='none';},4000);}
         function showSvgLoader(show){ document.getElementById('svgLoader').style.display = show? 'block':'none'; }
 
         // WEBP
         const webpUploadArea = document.getElementById('webpUploadArea');
+        const webpUploadAreaInterface = document.getElementById('webpUploadAreaInterface');
         const webpFileInput = document.getElementById('webpFileInput');
         const webpPreviewCanvas = document.getElementById('webpPreviewCanvas');
         const webpDownloadBtn = document.getElementById('webpDownloadBtn');
@@ -856,7 +873,7 @@
         webpQualitySlider.addEventListener('input',(e)=>{ webpQualityValue.textContent=e.target.value+'%'; });
 
         function handleWebpFile(file){
-            document.getElementById('webpUploadArea').style.display='none';
+            document.getElementById('webpUploadAreaInterface').style.display='none';
             webpOriginalFileName = file.name.replace(/\.[^/.]+$/,'');
             const reader = new FileReader();
             reader.onload = (e)=>{
@@ -869,7 +886,7 @@
                     document.getElementById('webpInterface').style.display='flex';
                     showWebpStatus('WebP loaded successfully!','success');
                 };
-                webpImage.onerror = ()=>{ document.getElementById('webpUploadArea').style.display='block'; showWebpStatus('Error loading WebP','error'); };
+                webpImage.onerror = ()=>{ document.getElementById('webpUploadAreaInterface').style.display='block'; showWebpStatus('Error loading WebP','error'); };
                 webpImage.src = e.target.result;
             };
             reader.readAsDataURL(file);
@@ -883,11 +900,12 @@
             canvas.toBlob((blob)=>{ link.href=URL.createObjectURL(blob); link.click(); URL.revokeObjectURL(link.href); showWebpStatus('Image downloaded successfully!','success'); }, 'image/jpeg', quality);
         });
 
-        webpResetBtn.addEventListener('click', ()=>{ webpFileInput.value=''; document.getElementById('webpInterface').style.display='none'; document.getElementById('webpUploadArea').style.display='block'; webpOriginalFileName=''; webpImage=null; });
+        webpResetBtn.addEventListener('click', ()=>{ webpFileInput.value=''; document.getElementById('webpInterface').style.display='none'; document.getElementById('webpUploadAreaInterface').style.display='block'; webpOriginalFileName=''; webpImage=null; });
         function showWebpStatus(msg,type){ document.getElementById('webpStatus').textContent=msg; document.getElementById('webpStatus').className='status '+type; document.getElementById('webpStatus').style.display='block'; setTimeout(()=>{document.getElementById('webpStatus').style.display='none';},4000); }
 
         // ---------------- POSTER: A4 to 4x A6 (with orientation & bleed option) ----------------
         const posterUploadArea = document.getElementById('posterUploadArea');
+        const posterUploadAreaInterface = document.getElementById('posterUploadAreaInterface');
         const posterFileInput = document.getElementById('posterFileInput');
         const posterInterface = document.getElementById('posterInterface');
         const posterPreviewCanvas = document.getElementById('posterPreviewCanvas');
@@ -915,7 +933,7 @@
         async function handlePosterFile(file){
             posterFileName = file.name.replace(/\.[^/.]+$/,'');
             showPosterLoader(true);
-            posterUploadArea.style.display='none';
+            posterUploadAreaInterface.style.display='none';
             try {
                 const arrayBuffer = await file.arrayBuffer();
                 posterPdfDoc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
@@ -934,7 +952,7 @@
             } catch(err) {
                 console.error(err);
                 showPosterLoader(false);
-                posterUploadArea.style.display='block';
+                posterUploadAreaInterface.style.display='block';
                 showPosterStatus('Error loading PDF: '+err.message, 'error');
             }
         }
@@ -1133,9 +1151,15 @@
         });
 
         posterResetBtn.addEventListener('click', ()=>{
-            posterFileInput.value=''; posterInterface.style.display='none'; posterUploadArea.style.display='block'; posterPreview.style.display='none'; posterButtonGroup.style.display='none';
+            posterFileInput.value=''; posterInterface.style.display='none'; posterUploadAreaInterface.style.display='block'; posterPreview.style.display='none'; posterButtonGroup.style.display='none';
             posterPdfDoc = null; posterFileName=''; posterOrientation='portrait';
         });
+
+        document.getElementById('cancelBtn').addEventListener('click', function(event) {
+           event.stopPropagation();   // ✨ Prevents triggering upload dialog
+           goHome();
+        });
+
 
         // END DOMContentLoaded
     });
@@ -1150,4 +1174,3 @@
     </footer>
 </body>
 </html>
-
